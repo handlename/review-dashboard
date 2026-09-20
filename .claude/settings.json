@@ -5,9 +5,16 @@
         "source": "github",
         "repo": "Yeachan-Heo/oh-my-claudecode"
       }
+    },
+    "handlename": {
+      "source": {
+        "source": "github",
+        "repo": "handlename/agent-skills"
+      }
     }
   },
   "enabledPlugins": {
-    "oh-my-claudecode@omc": true
+    "oh-my-claudecode@omc": true,
+    "handlename@handlename": true
   }
 }
