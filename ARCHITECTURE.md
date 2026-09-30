@@ -78,8 +78,13 @@ src/
 ```ts
 type ReviewState = "APPROVED" | "CHANGES_REQUESTED" | "COMMENTED" | "DISMISSED";
 
+type Actor = {
+  readonly login: string;
+  readonly avatarUrl: string | null; // null unless it starts with https://avatars.githubusercontent.com/
+};
+
 type Review = {
-  readonly reviewer: string;     // login
+  readonly reviewer: Actor | null;   // null if the user account has been deleted
   readonly state: ReviewState;
   readonly submittedAt: string;  // ISO 8601
 };
@@ -90,7 +95,7 @@ type PullRequest = {
   readonly url: string;
   readonly repository: string;   // nameWithOwner
   readonly owner: string;
-  readonly author: string | null;
+  readonly author: Actor | null;
   readonly diffStat: { readonly additions: number; readonly deletions: number; readonly changedFiles: number };
   readonly createdAt: string;
   readonly updatedAt: string;
@@ -110,6 +115,8 @@ type Cache = {
 
 All types are readonly; state is updated by creating new values.
 Review results outside the displayed set, such as `PENDING`, are dropped during conversion in infra.
+`avatarUrl` values that do not start with `https://avatars.githubusercontent.com/` are converted to `null` in infra, so the UI never loads images from other hosts (see the CSP in [Security](#security)).
+Sorting by author compares `author.login`.
 
 ## GitHub API
 
@@ -128,7 +135,7 @@ query SearchPullRequests($query: String!, $after: String) {
         number
         title
         url
-        author { login }
+        author { login avatarUrl(size: 40) }
         additions
         deletions
         changedFiles
@@ -136,7 +143,7 @@ query SearchPullRequests($query: String!, $after: String) {
         updatedAt
         repository { nameWithOwner owner { login } }
         latestReviews(first: 20) {
-          nodes { author { login } state submittedAt }
+          nodes { author { login avatarUrl(size: 40) } state submittedAt }
         }
       }
     }
@@ -146,6 +153,7 @@ query SearchPullRequests($query: String!, $after: String) {
 
 - `latestReviews` already returns the latest review per reviewer, so the app does not need to aggregate them (FR-LIST-3)
 - A search query without `is:pr` can also return issues, so non-PullRequest nodes are dropped during conversion
+- `avatarUrl(size: 40)` requests images at twice the 20px display size
 - Paginate with `endCursor` until `hasNextPage` is false or 1,000 results are reached (NFR-6)
 
 ### Authentication and errors
@@ -177,11 +185,16 @@ stateDiagram-v2
     Ready --> Refreshing: manual refresh
     ErrorWithCache --> Refreshing: manual refresh
     Error --> Fetching: manual refresh
+    Fetching --> Unauthorized: HTTP 401
+    Refreshing --> Unauthorized: HTTP 401
+    Unauthorized --> Idle: new PAT saved
 ```
 
 - While Refreshing, keep showing the cached list and indicate that a fetch is in progress (FR-CACHE-3, FR-CACHE-5)
 - On failure, keep showing the list if a cache exists (FR-ERR-2)
 - Applying a search query starts over from Idle with the new query (FR-CACHE-6)
+- In Unauthorized, the PAT input screen is shown instead of the list (FR-AUTH-3). The PAT and the cache are kept until a new PAT is saved or the user logs out. Saving a new PAT returns to Idle, so an existing cache is shown again while it is refreshed
+- Logging out from any state removes the PAT and the cache and shows the PAT input screen (FR-AUTH-2)
 
 ## Persistence
 
@@ -222,7 +235,7 @@ Because the PAT is stored in localStorage, preventing XSS is the top priority. (
 ## Testing
 
 - Unit-test the domain's pure functions (sorting, grouping, search query validation, cache validity) with Vitest
-- Test `githubMapper` with GraphQL response fixtures (including dropping issue nodes, dropping `PENDING`, and a null author)
+- Test `githubMapper` with GraphQL response fixtures (including dropping issue nodes, dropping `PENDING`, a null author, a null reviewer, and converting an `avatarUrl` on another host to `null`)
 - Test `storage` against invalid JSON and values in an old format
 - Verify the acceptance criteria in REQUIREMENTS.md manually with a real PAT
 

@@ -32,6 +32,7 @@ It runs entirely in the browser as a static site hosted on GitHub Pages, and tal
 
 - [REQUIREMENTS.md](REQUIREMENTS.md): Functional and non-functional requirements, and acceptance criteria
 - [ARCHITECTURE.md](ARCHITECTURE.md): Architecture, data model, API usage, persistence, and security
+- [UI_DESIGN.md](UI_DESIGN.md): Design tokens, screens, components, per-state display, and accessibility
 - [GLOSSARY.md](GLOSSARY.md): Definitions of the terms used in this project
 
 ## Tech stack

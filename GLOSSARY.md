@@ -46,9 +46,14 @@ A fetch the user starts by pressing the refresh button. (FR-CACHE-4)
 A single pull request shown in the list.
 It has a PR number, title, URL, repository, author, diff stat, created date, updated date, and a list of latest reviews. (FR-LIST-1)
 
+### Actor (Actor)
+
+A GitHub user as shown in the app: a login and an avatar URL.
+The avatar URL is absent unless it points to `avatars.githubusercontent.com`; the UI then shows a ghost.
+
 ### Author (author)
 
-The GitHub user who opened the PR.
+The GitHub user who opened the PR, as an actor (login and avatar).
 It may be absent if the user account has been deleted.
 
 ### Diff stat (DiffStat)
@@ -64,7 +69,8 @@ It has a reviewer, a review result, and a submission time.
 
 ### Reviewer (reviewer)
 
-A GitHub user who has submitted a review on the PR.
+A GitHub user who has submitted a review on the PR, as an actor (login and avatar).
+It may be absent if the user account has been deleted.
 Users and teams whose review was requested but who have not yet submitted a review are not treated as reviewers.
 
 ### Review result (ReviewState)
@@ -115,6 +121,33 @@ One of PR number, title, repository, author, diff stat, created date, or updated
 
 The direction of ordering by the sort key.
 Either `asc` (ascending) or `desc` (descending); the initial value is `desc`. (FR-LIST-6, FR-LIST-7)
+
+## UI
+
+Terms from [UI_DESIGN.md](UI_DESIGN.md).
+
+### Design token
+
+A named CSS custom property (`--rd-*`) that holds one visual value, such as a color, font size, or spacing.
+Color tokens have one value per theme.
+
+### Theme
+
+The light or dark set of color token values.
+It follows the OS setting (`prefers-color-scheme`); there is no manual switch.
+
+### Review badge
+
+The mark for one latest review: the reviewer's avatar with a review state icon over its corner.
+The reviewer and the review result are given in its tooltip and accessible name. (FR-LIST-3)
+
+### State matrix
+
+The table in UI_DESIGN.md that fixes what each screen area shows in each state of the fetch flow.
+
+### Ghost
+
+The placeholder shown instead of a user's avatar and login when the user account has been deleted or the avatar cannot be shown.
 
 ## Persistence
 
