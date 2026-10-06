@@ -9,6 +9,7 @@ export function GroupSection(props: {
 	sortKey: SortKey;
 	sortDirection: SortDirection;
 	onSort(key: SortKey): void;
+	now: Date | null;
 }) {
 	const { name, ...table } = props;
 	return (

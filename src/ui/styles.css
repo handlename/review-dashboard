@@ -18,6 +18,7 @@
 	--rd-color-danger-emphasis: #cf222e;
 	--rd-color-neutral-emphasis: #59636e;
 	--rd-color-focus: #0969da;
+	--rd-color-backdrop: #1f232880;
 
 	--rd-font-family-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
 	--rd-font-family-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
@@ -70,6 +71,7 @@
 		--rd-color-danger-emphasis: #da3633;
 		--rd-color-neutral-emphasis: #656c76;
 		--rd-color-focus: #1f6feb;
+		--rd-color-backdrop: #010409cc;
 	}
 }
 
@@ -304,6 +306,23 @@ button {
 	color: var(--rd-color-fg-muted);
 }
 
+/* Draft rows are muted; links keep an underline because their color no longer stands out. */
+.pr-table .pr-draft {
+	background: var(--rd-color-canvas-inset);
+}
+
+.pr-table .pr-draft td,
+.pr-table .pr-draft a,
+.pr-table .pr-draft .diff-additions,
+.pr-table .pr-draft .diff-deletions,
+.pr-table .pr-draft .diff-files {
+	color: var(--rd-color-fg-muted);
+}
+
+.pr-table .pr-draft a {
+	text-decoration: underline;
+}
+
 /* Avatars */
 
 .author {
@@ -486,6 +505,50 @@ button {
 	gap: var(--rd-space-2);
 }
 
+.header-actions {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--rd-space-3);
+}
+
+/* Settings dialog */
+
+.settings-dialog {
+	width: min(360px, calc(100vw - 2 * var(--rd-layout-gutter)));
+	margin: auto;
+	padding: var(--rd-space-5);
+	background: var(--rd-color-canvas-default);
+	color: var(--rd-color-fg-default);
+	border: var(--rd-border-width-thin) solid var(--rd-color-border-default);
+	border-radius: var(--rd-radius-medium);
+}
+
+.settings-dialog::backdrop {
+	background: var(--rd-color-backdrop);
+}
+
+.settings-heading {
+	margin-bottom: var(--rd-space-4);
+	font-size: var(--rd-font-size-300);
+}
+
+.settings-field {
+	display: flex;
+	align-items: center;
+	gap: var(--rd-space-2);
+	margin-bottom: var(--rd-space-3);
+}
+
+.settings-actions {
+	display: flex;
+	justify-content: space-between;
+	gap: var(--rd-space-2);
+	margin-top: var(--rd-space-5);
+	padding-top: var(--rd-space-4);
+	border-top: var(--rd-border-width-thin) solid var(--rd-color-border-default);
+}
+
 .token-form {
 	max-width: 480px;
 	margin: var(--rd-space-7) auto 0;
@@ -569,6 +632,46 @@ button {
 	flex-wrap: wrap;
 	gap: var(--rd-space-2);
 	margin-left: auto;
+}
+
+.refresh-button {
+	position: relative;
+	overflow: hidden;
+}
+
+/* Grows across the bottom of the Refresh button until the next auto refresh. */
+.refresh-timer {
+	position: absolute;
+	left: 0;
+	bottom: 0;
+	width: 100%;
+	height: 2px;
+	background: var(--rd-color-accent-emphasis);
+	transform-origin: left;
+	animation-name: rd-grow;
+	animation-timing-function: linear;
+	animation-fill-mode: forwards;
+}
+
+@keyframes rd-grow {
+	from {
+		transform: scaleX(0);
+	}
+	to {
+		transform: scaleX(1);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.refresh-timer {
+		animation-timing-function: steps(10, end);
+	}
+}
+
+@media (forced-colors: active) {
+	.refresh-timer {
+		background: CanvasText;
+	}
 }
 
 .list-message,

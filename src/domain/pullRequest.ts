@@ -26,6 +26,7 @@ export type DiffStat = {
 export type PullRequest = {
 	readonly number: number;
 	readonly title: string;
+	readonly isDraft: boolean;
 	readonly url: string;
 	readonly repository: string;
 	readonly owner: string;

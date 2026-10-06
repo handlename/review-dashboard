@@ -1,21 +1,37 @@
 import type { PullRequest } from "../domain/pullRequest";
 import type { Grouping, SortDirection, SortKey } from "../domain/viewSettings";
-import { formatDateTime, formatFileCount, formatNumber } from "./format";
+import { formatDateTime, formatFileCount, formatNumber, formatRelativeTime } from "./format";
 import { ExternalLinkIcon, SortIcon } from "./icons";
 import { Avatar, ReviewBadges, loginOf } from "./ReviewBadges";
 
-function DateTime(props: { iso: string }) {
-	return <time dateTime={props.iso}>{formatDateTime(props.iso)}</time>;
+// `now` is null when absolute times are shown.
+function DateTime(props: { iso: string; now: Date | null }) {
+	const absolute = formatDateTime(props.iso);
+	if (props.now === null) {
+		return <time dateTime={props.iso}>{absolute}</time>;
+	}
+	return (
+		<time dateTime={props.iso} title={absolute}>
+			{formatRelativeTime(props.iso, props.now)}
+		</time>
+	);
 }
 
 function Title(props: { pr: PullRequest }) {
-	const { title, url } = props.pr;
+	const { title, url, isDraft } = props.pr;
+	const draft = isDraft && <span className="visually-hidden"> (draft)</span>;
 	if (!url.startsWith("https://github.com/")) {
-		return <>{title}</>;
+		return (
+			<>
+				{title}
+				{draft}
+			</>
+		);
 	}
 	return (
 		<a href={url} target="_blank" rel="noopener noreferrer">
-			{title} <ExternalLinkIcon />
+			{title}
+			{draft} <ExternalLinkIcon />
 			<span className="visually-hidden"> (opens in a new tab)</span>
 		</a>
 	);
@@ -46,6 +62,7 @@ export function PullRequestTable(props: {
 	sortKey: SortKey;
 	sortDirection: SortDirection;
 	onSort(key: SortKey): void;
+	now: Date | null;
 }) {
 	const hidden = HIDDEN_KEYS[props.grouping];
 	const shows = (key: SortKey) => !hidden.includes(key);
@@ -77,7 +94,7 @@ export function PullRequestTable(props: {
 			</thead>
 			<tbody>
 				{props.pullRequests.map((pr) => (
-					<tr key={pr.url}>
+					<tr key={pr.url} className={pr.isDraft ? "pr-draft" : undefined}>
 						<td className="col-number">#{pr.number}</td>
 						<td>
 							<Title pr={pr} />
@@ -100,10 +117,10 @@ export function PullRequestTable(props: {
 							<span className="diff-files">{formatFileCount(pr.diffStat.changedFiles)}</span>
 						</td>
 						<td className="col-created">
-							<DateTime iso={pr.createdAt} />
+							<DateTime iso={pr.createdAt} now={props.now} />
 						</td>
 						<td className="col-updated">
-							<DateTime iso={pr.updatedAt} />
+							<DateTime iso={pr.updatedAt} now={props.now} />
 						</td>
 					</tr>
 				))}

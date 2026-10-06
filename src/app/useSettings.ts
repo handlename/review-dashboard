@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import type { Grouping, SortKey, ViewSettings } from "../domain/viewSettings";
+import type { AutoRefreshMinutes, Grouping, SortKey, ViewSettings } from "../domain/viewSettings";
 import { DEFAULT_VIEW_SETTINGS, toggleSort as toggleSortKey } from "../domain/viewSettings";
 import { clearSession, loadToken, loadViewSettings, saveToken as storeToken, saveViewSettings } from "../infra/storage";
 
@@ -34,5 +34,24 @@ export function useSettings() {
 		[viewSettings, updateViewSettings],
 	);
 
-	return { token, saveToken, logout, viewSettings, setGrouping, toggleSort };
+	const setRelativeTime = useCallback(
+		(relativeTime: boolean) => updateViewSettings({ ...viewSettings, relativeTime }),
+		[viewSettings, updateViewSettings],
+	);
+
+	const setAutoRefreshMinutes = useCallback(
+		(autoRefreshMinutes: AutoRefreshMinutes) => updateViewSettings({ ...viewSettings, autoRefreshMinutes }),
+		[viewSettings, updateViewSettings],
+	);
+
+	return {
+		token,
+		saveToken,
+		logout,
+		viewSettings,
+		setGrouping,
+		toggleSort,
+		setRelativeTime,
+		setAutoRefreshMinutes,
+	};
 }

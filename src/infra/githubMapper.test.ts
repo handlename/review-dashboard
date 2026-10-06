@@ -9,6 +9,7 @@ function prNode(overrides: Record<string, unknown> = {}): SearchNode {
 	return {
 		number: 123,
 		title: "Fix pagination bug",
+		isDraft: false,
 		url: "https://github.com/handlename/review-dashboard/pull/123",
 		author: { login: "alice", avatarUrl: avatar("alice") },
 		additions: 120,
@@ -75,6 +76,11 @@ describe("toPullRequests", () => {
 			"COMMENTED",
 			"DISMISSED",
 		]);
+	});
+
+	it("maps isDraft", () => {
+		const [pr] = toPullRequests([prNode({ isDraft: true })]);
+		expect(pr.isDraft).toBe(true);
 	});
 
 	it("maps null author to null", () => {

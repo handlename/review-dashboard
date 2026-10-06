@@ -99,6 +99,25 @@ export function RefreshIcon() {
 	);
 }
 
+export function GearIcon() {
+	return (
+		<svg
+			width="16"
+			height="16"
+			viewBox="0 0 16 16"
+			fill="none"
+			stroke="currentColor"
+			strokeWidth="1.5"
+			aria-hidden="true"
+		>
+			{/* Eight teeth: a thick ring dashed into equal segments (circumference 2π × 6.25 / 16). */}
+			<circle cx="8" cy="8" r="6.25" strokeWidth="2.5" strokeDasharray="2.454 2.454" />
+			<circle cx="8" cy="8" r="4.5" />
+			<circle cx="8" cy="8" r="1.75" />
+		</svg>
+	);
+}
+
 export function SpinnerIcon() {
 	return (
 		<svg

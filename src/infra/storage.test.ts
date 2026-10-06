@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createSearchQuery } from "../domain/searchQuery";
 import type { Cache } from "../domain/cache";
+import { DEFAULT_VIEW_SETTINGS } from "../domain/viewSettings";
 import { clearSession, loadCache, loadToken, loadViewSettings, saveCache, saveToken, saveViewSettings } from "./storage";
 
 function fakeStorage(): Storage {
@@ -60,13 +61,19 @@ describe("storage: token", () => {
 
 describe("storage: view settings", () => {
 	it("saveViewSettings then loadViewSettings round-trips", () => {
-		const settings = { grouping: "repository", sortKey: "diff", sortDirection: "asc" } as const;
+		const settings = {
+			grouping: "repository",
+			sortKey: "diff",
+			sortDirection: "asc",
+			relativeTime: true,
+			autoRefreshMinutes: 5,
+		} as const;
 		saveViewSettings(settings);
 		expect(loadViewSettings()).toEqual(settings);
 	});
 
 	it("loadViewSettings accepts the owner sort key", () => {
-		const settings = { grouping: "none", sortKey: "owner", sortDirection: "desc" } as const;
+		const settings = { ...DEFAULT_VIEW_SETTINGS, sortKey: "owner" } as const;
 		saveViewSettings(settings);
 		expect(loadViewSettings()).toEqual(settings);
 	});
@@ -85,6 +92,31 @@ describe("storage: view settings", () => {
 		expect(loadViewSettings()).toBeNull();
 	});
 
+	it("loadViewSettings keeps grouping and sort and fills defaults for settings saved before relativeTime / autoRefreshMinutes", () => {
+		localStorage.setItem(
+			"review-dashboard:v1:view",
+			JSON.stringify({ grouping: "owner", sortKey: "title", sortDirection: "asc" }),
+		);
+		expect(loadViewSettings()).toEqual({
+			grouping: "owner",
+			sortKey: "title",
+			sortDirection: "asc",
+			relativeTime: false,
+			autoRefreshMinutes: 0,
+		});
+	});
+
+	it.each([
+		{ relativeTime: "yes", autoRefreshMinutes: 3 },
+		{ relativeTime: 1, autoRefreshMinutes: "5" },
+	])("loadViewSettings falls back to defaults for invalid relativeTime / autoRefreshMinutes %#", (value) => {
+		localStorage.setItem(
+			"review-dashboard:v1:view",
+			JSON.stringify({ grouping: "owner", sortKey: "title", sortDirection: "asc", ...value }),
+		);
+		expect(loadViewSettings()).toMatchObject({ relativeTime: false, autoRefreshMinutes: 0 });
+	});
+
 	it("loadViewSettings returns null when a field is missing (old format)", () => {
 		localStorage.setItem("review-dashboard:v1:view", JSON.stringify({ grouping: "none", sortKey: "diff" }));
 		expect(loadViewSettings()).toBeNull();
@@ -99,6 +131,7 @@ describe("storage: cache", () => {
 			{
 				number: 1,
 				title: "Fix pagination bug",
+				isDraft: false,
 				url: "https://github.com/acme/web/pull/1",
 				repository: "acme/web",
 				owner: "acme",
@@ -180,6 +213,12 @@ describe("storage: cache", () => {
 		expect(loadCache(query)).toBeNull();
 	});
 
+	it("loadCache returns null when a pull request lacks isDraft (old format)", () => {
+		const { isDraft: _, ...old } = pr;
+		store({ ...cache, pullRequests: [old] });
+		expect(loadCache(query)).toBeNull();
+	});
+
 	it("loadCache returns null when a review has an unknown state", () => {
 		store({ ...cache, pullRequests: [{ ...pr, latestReviews: [{ ...pr.latestReviews[0], state: "PENDING" }] }] });
 		expect(loadCache(query)).toBeNull();
@@ -206,9 +245,10 @@ describe("storage: clearSession", () => {
 	});
 
 	it("clearSession keeps view settings", () => {
-		saveViewSettings({ grouping: "owner", sortKey: "title", sortDirection: "asc" });
+		const settings = { ...DEFAULT_VIEW_SETTINGS, grouping: "owner", relativeTime: true, autoRefreshMinutes: 10 } as const;
+		saveViewSettings(settings);
 		clearSession();
-		expect(loadViewSettings()).toEqual({ grouping: "owner", sortKey: "title", sortDirection: "asc" });
+		expect(loadViewSettings()).toEqual(settings);
 	});
 
 	it("clearSession does not throw when localStorage access throws", () => {

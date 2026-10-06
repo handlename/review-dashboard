@@ -4,6 +4,7 @@ import type { Actor, PullRequest, Review } from "../domain/pullRequest";
 import type { SearchQuery } from "../domain/searchQuery";
 import { createSearchQuery } from "../domain/searchQuery";
 import type { ViewSettings } from "../domain/viewSettings";
+import { DEFAULT_VIEW_SETTINGS, isAutoRefreshMinutes } from "../domain/viewSettings";
 
 const PREFIX = "review-dashboard:v1:";
 
@@ -80,6 +81,7 @@ function isPullRequest(value: unknown): value is PullRequest {
 		isObject(value) &&
 		isNumber(value.number) &&
 		isString(value.title) &&
+		typeof value.isDraft === "boolean" &&
 		isString(value.url) &&
 		isString(value.repository) &&
 		isString(value.owner) &&
@@ -113,7 +115,16 @@ export function loadViewSettings(): ViewSettings | null {
 	) {
 		return null;
 	}
-	return { grouping: value.grouping, sortKey: value.sortKey, sortDirection: value.sortDirection };
+	// Fields added later fall back to their defaults, so older saved settings keep grouping and sort.
+	return {
+		grouping: value.grouping,
+		sortKey: value.sortKey,
+		sortDirection: value.sortDirection,
+		relativeTime: typeof value.relativeTime === "boolean" ? value.relativeTime : DEFAULT_VIEW_SETTINGS.relativeTime,
+		autoRefreshMinutes: isAutoRefreshMinutes(value.autoRefreshMinutes)
+			? value.autoRefreshMinutes
+			: DEFAULT_VIEW_SETTINGS.autoRefreshMinutes,
+	};
 }
 
 export function saveViewSettings(settings: ViewSettings): void {

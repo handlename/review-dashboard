@@ -1,13 +1,17 @@
 import { useEffect, useId, useRef, useState } from "react";
 import type { PullRequestsState } from "../app/pullRequestsReducer";
+import { useAutoRefresh } from "../app/useAutoRefresh";
 import { usePullRequests } from "../app/usePullRequests";
+import { useNow } from "../app/useNow";
 import { useSettings } from "../app/useSettings";
 import type { PullRequestGroup } from "../domain/group";
 import type { Grouping, SortKey, ViewSettings } from "../domain/viewSettings";
 import { formatNumber } from "./format";
 import { GroupSection } from "./GroupSection";
+import { GearIcon } from "./icons";
 import { PullRequestTable } from "./PullRequestTable";
 import { QueryBar } from "./QueryBar";
+import { SettingsDialog } from "./SettingsDialog";
 import { StatusBar, errorMessage } from "./StatusBar";
 import { TokenForm } from "./TokenForm";
 
@@ -51,8 +55,9 @@ function PullRequestList(props: {
 	groups: readonly PullRequestGroup[] | null;
 	viewSettings: ViewSettings;
 	onSort(key: SortKey): void;
+	now: Date | null;
 }) {
-	const { state, groups, viewSettings, onSort } = props;
+	const { state, groups, viewSettings, onSort, now } = props;
 	switch (state.status) {
 		case "Fetching":
 			return <p className="muted list-message">Loading pull requests...</p>;
@@ -67,6 +72,7 @@ function PullRequestList(props: {
 				sortDirection: viewSettings.sortDirection,
 				onSort,
 				grouping: viewSettings.grouping,
+				now,
 			};
 			if (groups.every((group) => group.pullRequests.length === 0)) {
 				return <p className="muted list-message">No pull requests match this query.</p>;
@@ -117,8 +123,20 @@ function liveRegionTexts(state: PullRequestsState, count: number): { status: str
 }
 
 export function App() {
-	const { token, saveToken, logout, viewSettings, setGrouping, toggleSort } = useSettings();
+	const {
+		token,
+		saveToken,
+		logout,
+		viewSettings,
+		setGrouping,
+		toggleSort,
+		setRelativeTime,
+		setAutoRefreshMinutes,
+	} = useSettings();
 	const { state, pullRequests, groups, applyQuery, refresh } = usePullRequests(token, viewSettings);
+	const now = useNow(viewSettings.relativeTime);
+	const timer = useAutoRefresh(state, viewSettings.autoRefreshMinutes, refresh);
+	const settingsRef = useRef<HTMLDialogElement>(null);
 
 	const unauthorized = state.status === "Unauthorized";
 	const dashboard = token !== null && !unauthorized;
@@ -146,7 +164,20 @@ export function App() {
 					<h1 ref={headingRef} className="app-title" tabIndex={-1}>
 						review-dashboard
 					</h1>
-					{dashboard && <GroupingSelect grouping={viewSettings.grouping} onChange={setGrouping} />}
+					{dashboard && (
+						<div className="header-actions">
+							<GroupingSelect grouping={viewSettings.grouping} onChange={setGrouping} />
+							<button
+								type="button"
+								className="button button-secondary"
+								aria-label="Settings"
+								aria-haspopup="dialog"
+								onClick={() => settingsRef.current?.showModal()}
+							>
+								<GearIcon />
+							</button>
+						</div>
+					)}
 				</div>
 			</header>
 			<main className="app-main">
@@ -162,8 +193,16 @@ export function App() {
 				) : (
 					<>
 						<QueryBar query={state.query} onApply={applyQuery} />
-						<StatusBar state={state} onRefresh={refresh} onLogout={logout} />
-						<PullRequestList state={state} groups={groups} viewSettings={viewSettings} onSort={toggleSort} />
+						<StatusBar state={state} timer={timer} onRefresh={refresh} />
+						<PullRequestList state={state} groups={groups} viewSettings={viewSettings} onSort={toggleSort} now={now} />
+						<SettingsDialog
+							dialogRef={settingsRef}
+							relativeTime={viewSettings.relativeTime}
+							autoRefreshMinutes={viewSettings.autoRefreshMinutes}
+							onRelativeTimeChange={setRelativeTime}
+							onAutoRefreshMinutesChange={setAutoRefreshMinutes}
+							onLogout={logout}
+						/>
 					</>
 				)}
 			</main>

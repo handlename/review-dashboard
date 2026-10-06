@@ -6,6 +6,7 @@ function pr(number: number, repository: string): PullRequest {
 	return {
 		number,
 		title: `PR ${number}`,
+		isDraft: false,
 		url: `https://github.com/${repository}/pull/${number}`,
 		repository,
 		owner: repository.split("/")[0],

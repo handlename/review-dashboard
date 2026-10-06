@@ -1,6 +1,8 @@
+import { useId } from "react";
 import type { FetchFailure, PullRequestsState } from "../app/pullRequestsReducer";
+import type { AutoRefreshTimer } from "../app/useAutoRefresh";
 import type { Cache } from "../domain/cache";
-import { formatDateTime } from "./format";
+import { formatDateTime, formatMinutes } from "./format";
 import { RefreshIcon, SpinnerIcon, WarningIcon } from "./icons";
 
 type StatusView = {
@@ -40,8 +42,10 @@ export function errorMessage(error: FetchFailure): string {
 	}
 }
 
-export function StatusBar(props: { state: PullRequestsState; onRefresh(): void; onLogout(): void }) {
+export function StatusBar(props: { state: PullRequestsState; timer: AutoRefreshTimer | null; onRefresh(): void }) {
 	const view = statusView(props.state);
+	const descriptionId = useId();
+	const { timer } = props;
 	if (view === null) {
 		return null;
 	}
@@ -66,16 +70,27 @@ export function StatusBar(props: { state: PullRequestsState; onRefresh(): void; 
 				<div className="status-actions">
 					<button
 						type="button"
-						className="button button-secondary"
+						className="button button-secondary refresh-button"
 						aria-disabled={busy || undefined}
+						aria-describedby={timer === null ? undefined : descriptionId}
 						onClick={() => !busy && props.onRefresh()}
 					>
 						<RefreshIcon />
 						<span>Refresh</span>
+						{timer !== null && (
+							<span
+								key={timer.key}
+								className="refresh-timer"
+								style={{ animationDuration: `${timer.minutes * 60}s` }}
+								aria-hidden="true"
+							/>
+						)}
 					</button>
-					<button type="button" className="button button-secondary" onClick={props.onLogout}>
-						<span>Log out</span>
-					</button>
+					{timer !== null && (
+						<span id={descriptionId} className="visually-hidden">
+							Auto refresh every {formatMinutes(timer.minutes)}
+						</span>
+					)}
 				</div>
 			</div>
 			{view.error !== null && (

@@ -6,6 +6,7 @@ function pr(number: number, overrides: Partial<PullRequest> = {}): PullRequest {
 	return {
 		number,
 		title: `PR ${number}`,
+		isDraft: false,
 		url: `https://github.com/acme/repo/pull/${number}`,
 		repository: "acme/repo",
 		owner: "acme",

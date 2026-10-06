@@ -12,6 +12,7 @@ type ReviewNode = {
 type PullRequestNode = {
 	readonly number: number;
 	readonly title: string;
+	readonly isDraft: boolean;
 	readonly url: string;
 	readonly author: ActorNode;
 	readonly additions: number;
@@ -93,6 +94,7 @@ export function toPullRequests(
 	return [...unique.values()].map((node) => ({
 		number: node.number,
 		title: node.title,
+		isDraft: node.isDraft,
 		url: node.url,
 		repository: node.repository.nameWithOwner,
 		owner: node.repository.owner.login,

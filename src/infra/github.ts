@@ -29,6 +29,7 @@ query SearchPullRequests($query: String!, $after: String) {
       ... on PullRequest {
         number
         title
+        isDraft
         url
         author { login avatarUrl(size: 40) }
         additions
