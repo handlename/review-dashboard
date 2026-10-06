@@ -25,24 +25,41 @@ export function QueryBar(props: {
 	}
 
 	return (
-		<form onSubmit={handleSubmit} noValidate>
-			<label htmlFor={inputId}>Search query</label>
-			<input
-				id={inputId}
-				type="text"
-				spellCheck={false}
-				value={value}
-				onChange={(e) => setValue(e.target.value)}
-				aria-invalid={empty || undefined}
-				aria-describedby={empty ? helperId : undefined}
-			/>
-			<button type="submit" aria-disabled={empty || undefined}>
-				Apply
-			</button>
-			<button type="button" onClick={handleReset}>
-				Reset
-			</button>
-			{empty && <p id={helperId}>A search query is required.</p>}
+		<form className="query-bar" onSubmit={handleSubmit} noValidate>
+			<label className="field-label" htmlFor={inputId}>
+				Search query
+			</label>
+			<div className="query-row">
+				<input
+					id={inputId}
+					className="input query-input"
+					type="text"
+					spellCheck={false}
+					value={value}
+					onChange={(e) => setValue(e.target.value)}
+					aria-invalid={empty || undefined}
+					aria-describedby={empty ? helperId : undefined}
+				/>
+				<button
+					type="submit"
+					className="button button-primary"
+					aria-disabled={empty || undefined}
+				>
+					<span>Apply</span>
+				</button>
+				<button
+					type="button"
+					className="button button-secondary"
+					onClick={handleReset}
+				>
+					<span>Reset</span>
+				</button>
+			</div>
+			{empty && (
+				<p id={helperId} className="helper-text">
+					A search query is required.
+				</p>
+			)}
 		</form>
 	);
 }

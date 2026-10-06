@@ -1,6 +1,7 @@
 import type { FetchFailure, PullRequestsState } from "../app/pullRequestsReducer";
 import type { Cache } from "../domain/cache";
 import { formatDateTime } from "./format";
+import { RefreshIcon, SpinnerIcon, WarningIcon } from "./icons";
 
 type StatusView = {
 	readonly cache: Cache | null;
@@ -47,29 +48,42 @@ export function StatusBar(props: { state: PullRequestsState; onRefresh(): void; 
 	const busy = view.progress !== null;
 
 	return (
-		<div>
-			{view.cache === null ? (
-				<span>Not fetched yet</span>
-			) : (
-				<span>
-					Last fetched{" "}
-					<time dateTime={view.cache.fetchedAt}>
-						{formatDateTime(view.cache.fetchedAt)}
-					</time>
-				</span>
+		<div className="status-bar">
+			<div className="status-row">
+				{view.cache === null ? (
+					<span>Not fetched yet</span>
+				) : (
+					<span>
+						Last fetched <time dateTime={view.cache.fetchedAt}>{formatDateTime(view.cache.fetchedAt)}</time>
+					</span>
+				)}
+				{busy && (
+					<span className="status-progress">
+						<SpinnerIcon />
+						{view.progress}
+					</span>
+				)}
+				<div className="status-actions">
+					<button
+						type="button"
+						className="button button-secondary"
+						aria-disabled={busy || undefined}
+						onClick={() => !busy && props.onRefresh()}
+					>
+						<RefreshIcon />
+						<span>Refresh</span>
+					</button>
+					<button type="button" className="button button-secondary" onClick={props.onLogout}>
+						<span>Log out</span>
+					</button>
+				</div>
+			</div>
+			{view.error !== null && (
+				<p className="error-line">
+					<WarningIcon />
+					{errorMessage(view.error)}
+				</p>
 			)}
-			{busy && <span>{view.progress}</span>}
-			<button
-				type="button"
-				aria-disabled={busy || undefined}
-				onClick={() => !busy && props.onRefresh()}
-			>
-				Refresh
-			</button>
-			<button type="button" onClick={props.onLogout}>
-				Log out
-			</button>
-			{view.error !== null && <p>{errorMessage(view.error)}</p>}
 		</div>
 	);
 }

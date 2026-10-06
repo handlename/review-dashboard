@@ -1,4 +1,4 @@
-import { useId } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import type { PullRequestsState } from "../app/pullRequestsReducer";
 import { usePullRequests } from "../app/usePullRequests";
 import { useSettings } from "../app/useSettings";
@@ -8,7 +8,7 @@ import { formatNumber } from "./format";
 import { GroupSection } from "./GroupSection";
 import { PullRequestTable } from "./PullRequestTable";
 import { QueryBar } from "./QueryBar";
-import { StatusBar } from "./StatusBar";
+import { StatusBar, errorMessage } from "./StatusBar";
 import { TokenForm } from "./TokenForm";
 
 const GROUPING_OPTIONS: readonly {
@@ -26,10 +26,13 @@ function GroupingSelect(props: {
 }) {
 	const id = useId();
 	return (
-		<div>
-			<label htmlFor={id}>Group by</label>
+		<div className="grouping">
+			<label className="field-label" htmlFor={id}>
+				Group by
+			</label>
 			<select
 				id={id}
+				className="select"
 				value={props.grouping}
 				onChange={(e) => props.onChange(e.target.value as Grouping)}
 			>
@@ -52,9 +55,9 @@ function PullRequestList(props: {
 	const { state, groups, viewSettings, onSort } = props;
 	switch (state.status) {
 		case "Fetching":
-			return <p>Loading pull requests...</p>;
+			return <p className="muted list-message">Loading pull requests...</p>;
 		case "Error":
-			return <p>Could not load pull requests.</p>;
+			return <p className="muted list-message">Could not load pull requests.</p>;
 		default: {
 			if (groups === null) {
 				return null;
@@ -65,10 +68,10 @@ function PullRequestList(props: {
 				onSort,
 			};
 			if (groups.every((group) => group.pullRequests.length === 0)) {
-				return <p>No pull requests match this query.</p>;
+				return <p className="muted list-message">No pull requests match this query.</p>;
 			}
 			const truncated = state.status === "Ready" && state.truncated && (
-				<p>
+				<p className="muted truncated-line">
 					Showing {formatNumber(groups.reduce((n, group) => n + group.pullRequests.length, 0))} of{" "}
 					{formatNumber(state.issueCount)} results (search limit: 1,000)
 				</p>
@@ -93,40 +96,75 @@ function PullRequestList(props: {
 	}
 }
 
+// Texts for the always-present live regions (UI_DESIGN "State matrix").
+function liveRegionTexts(state: PullRequestsState, count: number): { status: string; alert: string } {
+	switch (state.status) {
+		case "Refreshing":
+			return { status: "Refreshing pull requests", alert: "" };
+		case "Fetching":
+			return { status: "Loading pull requests", alert: "" };
+		case "Ready":
+			return { status: `Updated. ${count} pull requests`, alert: "" };
+		case "ErrorWithCache":
+		case "Error":
+			return { status: "", alert: errorMessage(state.error) };
+		case "Unauthorized":
+			return { status: "", alert: "Your token is invalid or expired." };
+		default:
+			return { status: "", alert: "" };
+	}
+}
+
 export function App() {
 	const { token, saveToken, logout, viewSettings, setGrouping, toggleSort } = useSettings();
-	const { state, groups, applyQuery, refresh } = usePullRequests(token, viewSettings);
+	const { state, pullRequests, groups, applyQuery, refresh } = usePullRequests(token, viewSettings);
 
 	const unauthorized = state.status === "Unauthorized";
 	const dashboard = token !== null && !unauthorized;
+	const live = liveRegionTexts(state, pullRequests?.length ?? 0);
+
+	// Focus follows screen changes, but not the screen shown on load.
+	const headingRef = useRef<HTMLHeadingElement>(null);
+	const previousDashboard = useRef(dashboard);
+	const [screenChanged, setScreenChanged] = useState(false);
+	useEffect(() => {
+		if (previousDashboard.current === dashboard) {
+			return;
+		}
+		previousDashboard.current = dashboard;
+		setScreenChanged(true);
+		if (dashboard) {
+			headingRef.current?.focus();
+		}
+	}, [dashboard]);
 
 	return (
 		<>
-			<header>
-				<h1 tabIndex={-1}>review-dashboard</h1>
-				{dashboard && (
-					<GroupingSelect
-						grouping={viewSettings.grouping}
-						onChange={setGrouping}
-					/>
-				)}
+			<header className="app-header">
+				<div className="app-header-inner">
+					<h1 ref={headingRef} className="app-title" tabIndex={-1}>
+						review-dashboard
+					</h1>
+					{dashboard && <GroupingSelect grouping={viewSettings.grouping} onChange={setGrouping} />}
+				</div>
 			</header>
-			<main>
+			<main className="app-main">
 				{!dashboard ? (
-					<TokenForm onSave={saveToken} unauthorized={unauthorized} onLogout={logout} />
+					<TokenForm onSave={saveToken} unauthorized={unauthorized} onLogout={logout} focusInput={screenChanged} />
 				) : (
 					<>
 						<QueryBar query={state.query} onApply={applyQuery} />
 						<StatusBar state={state} onRefresh={refresh} onLogout={logout} />
-						<PullRequestList
-							state={state}
-							groups={groups}
-							viewSettings={viewSettings}
-							onSort={toggleSort}
-						/>
+						<PullRequestList state={state} groups={groups} viewSettings={viewSettings} onSort={toggleSort} />
 					</>
 				)}
 			</main>
+			<div className="visually-hidden" role="status">
+				{live.status}
+			</div>
+			<div className="visually-hidden" role="alert">
+				{live.alert}
+			</div>
 		</>
 	);
 }
