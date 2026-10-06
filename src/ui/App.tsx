@@ -150,7 +150,14 @@ export function App() {
 			</header>
 			<main className="app-main">
 				{!dashboard ? (
-					<TokenForm onSave={saveToken} unauthorized={unauthorized} onLogout={logout} focusInput={screenChanged} />
+					// Remount on logout from Unauthorized so focus and a stale error are reset.
+					<TokenForm
+						key={unauthorized ? "unauthorized" : "signed-out"}
+						onSave={saveToken}
+						unauthorized={unauthorized}
+						onLogout={logout}
+						focusInput={screenChanged}
+					/>
 				) : (
 					<>
 						<QueryBar query={state.query} onApply={applyQuery} />
