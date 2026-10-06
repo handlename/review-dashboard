@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createSearchQuery } from "../domain/searchQuery";
 import type { Cache } from "../domain/cache";
-import { clearSession, loadCache, loadQuery, loadToken, loadViewSettings, saveCache, saveQuery, saveToken, saveViewSettings } from "./storage";
+import { clearSession, loadCache, loadToken, loadViewSettings, saveCache, saveToken, saveViewSettings } from "./storage";
 
 function fakeStorage(): Storage {
 	const map = new Map<string, string>();
@@ -36,45 +36,25 @@ beforeEach(() => {
 	vi.stubGlobal("localStorage", fakeStorage());
 });
 
-describe("storage: token and query", () => {
+describe("storage: token", () => {
 	it("saveToken then loadToken returns the token", () => {
 		saveToken("ghp_example");
 		expect(loadToken()).toBe("ghp_example");
 	});
 
-	it("loadQuery returns null for an empty or whitespace-only stored value", () => {
-		localStorage.setItem("review-dashboard:v1:query", "");
-		expect(loadQuery()).toBeNull();
-		localStorage.setItem("review-dashboard:v1:query", "   ");
-		expect(loadQuery()).toBeNull();
-	});
-
-	it("loadQuery returns null when nothing is stored", () => {
-		expect(loadQuery()).toBeNull();
-	});
-
-	it("saveQuery then loadQuery returns the query", () => {
-		saveQuery(createSearchQuery("is:pr author:@me"));
-		expect(loadQuery()).toBe("is:pr author:@me");
-	});
-
 	it("ignores keys without the review-dashboard:v1: prefix (old format)", () => {
 		localStorage.setItem("token", "ghp_old");
-		localStorage.setItem("query", "is:pr");
 		expect(loadToken()).toBeNull();
-		expect(loadQuery()).toBeNull();
 	});
 
 	it("load* returns null when localStorage access throws", () => {
 		vi.stubGlobal("localStorage", throwingStorage());
 		expect(loadToken()).toBeNull();
-		expect(loadQuery()).toBeNull();
 	});
 
 	it("save* does not throw when setItem throws (quota exceeded)", () => {
 		vi.stubGlobal("localStorage", throwingStorage());
 		expect(() => saveToken("ghp_example")).not.toThrow();
-		expect(() => saveQuery(createSearchQuery("is:pr"))).not.toThrow();
 	});
 });
 
@@ -176,11 +156,9 @@ describe("storage: clearSession", () => {
 		expect(localStorage.getItem("review-dashboard:v1:cache")).toBeNull();
 	});
 
-	it("clearSession keeps query and view settings", () => {
-		saveQuery(createSearchQuery("is:pr"));
+	it("clearSession keeps view settings", () => {
 		saveViewSettings({ grouping: "owner", sortKey: "title", sortDirection: "asc" });
 		clearSession();
-		expect(loadQuery()).toBe("is:pr");
 		expect(loadViewSettings()).toEqual({ grouping: "owner", sortKey: "title", sortDirection: "asc" });
 	});
 

@@ -6,7 +6,8 @@ import { DEFAULT_QUERY } from "../domain/searchQuery";
 import { sortPullRequests } from "../domain/sort";
 import type { ViewSettings } from "../domain/viewSettings";
 import { FetchError, searchPullRequests } from "../infra/github";
-import { loadCache, loadQuery, saveCache, saveQuery } from "../infra/storage";
+import { loadCache, saveCache } from "../infra/storage";
+import { loadQuery, pushQuery } from "../infra/url";
 import type { PullRequestsState } from "./pullRequestsReducer";
 import { initialPullRequestsState, pullRequestsReducer } from "./pullRequestsReducer";
 
@@ -36,6 +37,13 @@ export function usePullRequests(token: string | null, viewSettings: ViewSettings
 		previousToken.current = token;
 		dispatch(token === null ? { type: "loggedOut" } : { type: "tokenSaved" });
 	}, [token]);
+
+	// Back/forward restores the query of that history entry.
+	useEffect(() => {
+		const handlePopState = () => dispatch({ type: "queryApplied", query: loadQuery() ?? DEFAULT_QUERY });
+		window.addEventListener("popstate", handlePopState);
+		return () => window.removeEventListener("popstate", handlePopState);
+	}, []);
 
 	// Leave Idle before paint, so Idle is never rendered.
 	useLayoutEffect(() => {
@@ -101,7 +109,7 @@ export function usePullRequests(token: string | null, viewSettings: ViewSettings
 	}, [inFlightId, token, query]);
 
 	const applyQuery = useCallback((next: SearchQuery) => {
-		saveQuery(next);
+		pushQuery(next);
 		dispatch({ type: "queryApplied", query: next });
 	}, []);
 

@@ -1,6 +1,5 @@
 import type { Cache } from "../domain/cache";
 import type { Actor, PullRequest, Review } from "../domain/pullRequest";
-import type { SearchQuery } from "../domain/searchQuery";
 import { createSearchQuery } from "../domain/searchQuery";
 import type { ViewSettings } from "../domain/viewSettings";
 
@@ -8,7 +7,6 @@ const PREFIX = "review-dashboard:v1:";
 
 const KEYS = {
 	token: `${PREFIX}token`,
-	query: `${PREFIX}query`,
 	view: `${PREFIX}view`,
 	cache: `${PREFIX}cache`,
 } as const;
@@ -102,22 +100,6 @@ export function saveToken(token: string): void {
 	write(KEYS.token, token);
 }
 
-export function loadQuery(): SearchQuery | null {
-	const value = read(KEYS.query);
-	if (value === null) {
-		return null;
-	}
-	try {
-		return createSearchQuery(value);
-	} catch {
-		return null;
-	}
-}
-
-export function saveQuery(query: SearchQuery): void {
-	write(KEYS.query, query);
-}
-
 export function loadViewSettings(): ViewSettings | null {
 	const value = readJson(KEYS.view);
 	if (
@@ -157,7 +139,7 @@ export function saveCache(cache: Cache): void {
 	write(KEYS.cache, JSON.stringify(cache));
 }
 
-// The search query and view settings are kept across logouts.
+// View settings are kept across logouts.
 export function clearSession(): void {
 	remove(KEYS.token);
 	remove(KEYS.cache);

@@ -8,6 +8,12 @@ export function QueryBar(props: {
 	onApply(query: SearchQuery): void;
 }) {
 	const [value, setValue] = useState<string>(props.query);
+	// Follow query changes from outside the form, such as browser back/forward.
+	const [shownQuery, setShownQuery] = useState(props.query);
+	if (shownQuery !== props.query) {
+		setShownQuery(props.query);
+		setValue(props.query);
+	}
 	const empty = value.trim() === "";
 	const inputId = useId();
 	const helperId = useId();
