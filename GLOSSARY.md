@@ -9,15 +9,15 @@ Names in parentheses are code identifiers; `FR-*` / `NFR-*` refer to requirement
 ### Search query (SearchQuery)
 
 A string in GitHub search syntax that selects which PRs to show.
-The app always holds exactly one search query, and an empty string is not allowed. (FR-QUERY-2, FR-QUERY-5)
+Each page holds exactly one search query, kept in the page URL, and an empty string is not allowed. (FR-QUERY-2, FR-QUERY-3, FR-QUERY-5)
 
 ### Default query (DEFAULT_QUERY)
 
-The search query used when none has been saved.
-It matches open PRs in non-archived repositories where your review is requested. (FR-QUERY-1)
+The search query used when the page URL has none.
+It matches open, non-draft PRs in non-archived repositories where your review is requested. (FR-QUERY-1)
 
 ```text
-is:pr review-requested:@me state:open archived:false
+is:pr review-requested:@me state:open archived:false -is:draft
 ```
 
 ### PAT (token)
@@ -115,7 +115,7 @@ One of `none` (no grouping), `owner` (by organization), or `repository` (by repo
 ### Sort key (SortKey)
 
 The column used to order the PR list.
-One of PR number, title, repository, author, diff stat, created date, or updated date. The initial value is the updated date. (FR-LIST-6 to FR-LIST-8)
+One of PR number, title, organization, repository, author, diff stat, created date, or updated date. The initial value is the updated date. (FR-LIST-6 to FR-LIST-8)
 
 ### Sort direction (SortDirection)
 
@@ -153,8 +153,8 @@ The placeholder shown instead of a user's avatar and login when the user account
 
 ### Cache (Cache)
 
-The result of the last successful fetch.
-It has a search query, a last fetched time, and a list of PRs, and it is tied to its search query.
+The result of the last successful fetch for one search query.
+It has a search query, a last fetched time, and a list of PRs. Caches for the five most recently fetched search queries are kept.
 A cache that does not match the current search query is not shown. (FR-CACHE-1, FR-CACHE-6)
 
 ### Last fetched time (fetchedAt)
@@ -169,5 +169,5 @@ Stored in localStorage and kept across reloads.
 
 ### Log out
 
-Removing the PAT and the cache from localStorage and returning to the PAT input screen.
-The search query and view settings are not removed. (FR-AUTH-2)
+Removing the PAT and the caches from localStorage and returning to the PAT input screen.
+The view settings are not removed, and the search query stays in the page URL. (FR-AUTH-2)

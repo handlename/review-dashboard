@@ -188,9 +188,9 @@ Buttons:
 |---|---|---|
 | `--rd-layout-max-width` | 1280px | Maximum width of the page content |
 | `--rd-layout-gutter` | 24px | Left and right page padding |
-| `--rd-table-min-width` | 976px | Minimum width of the PR table |
+| `--rd-table-min-width` | 1024px | Minimum width of the PR table |
 
-- The layout is designed for viewports 1024px wide or more. At 1024px the content is 976px wide, which fits the table exactly
+- The layout is designed for viewports 1024px wide or more. At 1024px the content is 976px wide, so the ungrouped table scrolls by 48px; grouped tables hide columns and fit
 - Only the PR table has a minimum width: `<table>` gets `min-width: var(--rd-table-min-width)` and its wrapper gets `overflow-x: auto`, so narrow viewports scroll the table horizontally. A data table is an exception in 1.4.10 Reflow
 - Everything outside the table (header, QueryBar, StatusBar, PAT input screen) uses `flex-wrap: wrap` and stays usable without horizontal scrolling down to a 320px viewport (1.4.10)
 - No element is sticky or fixed
@@ -243,12 +243,12 @@ Shown when a PAT is saved and the state is not Unauthorized.
 | (!) Could not reach GitHub. Check your connection and press Refresh.                         |  error line, danger-fg
 +----------------------------------------------------------------------------------------------+
 | handlename/review-dashboard (2)                                                              |  GroupSection h2, space-5 above
-| +------+--------------------+-------------+--------+-----------+----------+---------+-------+|
-| | #    | Title              | Repository  | Author | Reviews   | Diff     | Created | Upd.v ||  thead, canvas-subtle
-| +------+--------------------+-------------+--------+-----------+----------+---------+-------+|
-| | 123  | Fix pagination bug | handlename/ |  (o)   | (o)A (o)C | +120 -30 | 2026-09-| 2026- ||  row, min-height 48px
-| |      | [ext]              | review-     | alice  |           | 4 files  | 27 10:02| 09-28 ||
-| +------+--------------------+-------------+--------+-----------+----------+---------+-------+|
+| +------+----------------------------------+--------+-----------+----------+---------+-------+|
+| | #    | Title                            | Author | Reviews   | Diff     | Created | Upd.v ||  thead, canvas-subtle; Owner and Repository hidden
+| +------+----------------------------------+--------+-----------+----------+---------+-------+|
+| | 123  | Fix pagination bug               |  (o)   | (o)A (o)C | +120 -30 | 2026-09-| 2026- ||  row, min-height 48px
+| |      | [ext]                            | alice  |           | 4 files  | 27 10:02| 09-28 ||
+| +------+----------------------------------+--------+-----------+----------+---------+-------+|
 +----------------------------------------------------------------------------------------------+
 ```
 
@@ -321,6 +321,7 @@ Behavior:
 - Enter in the input runs Apply (FR-QUERY-2)
 - While the input is empty or whitespace-only, Apply has `aria-disabled="true"` and pressing it does nothing (FR-QUERY-5). It is not `disabled`, so focus is never lost
 - Reset puts the default query in the input and applies it (FR-QUERY-4)
+- The input follows the search query in the page URL, so browser back and forward update it (FR-QUERY-3)
 - Apply and Reset work in every state, including while fetching; applying aborts the running fetch ([ARCHITECTURE.md](ARCHITECTURE.md#authentication-and-errors))
 
 Used tokens: `--rd-font-family-mono`, `--rd-color-border-control`, `--rd-color-canvas-default`, `--rd-space-2`, `--rd-space-4`.
@@ -352,12 +353,13 @@ The initial sort is Updated, descending.
 |---|---|---|---|---|---|
 | Number | `#123`, `--rd-font-size-100` | Right | 56px | Yes | FR-LIST-1, FR-LIST-8 |
 | Title | PR title link, then the external link icon | Left | Remaining, at least 160px | Yes | FR-LIST-1, FR-LIST-4, FR-LIST-8 |
-| Repository | `owner/name`, may wrap after `/` | Left | 144px | Yes | FR-LIST-1, FR-LIST-8 |
+| Owner | Organization login | Left | 96px | Yes | FR-LIST-1, FR-LIST-8 |
+| Repository | Repository name without the owner | Left | 112px | Yes | FR-LIST-1, FR-LIST-8 |
 | Author | See [Author cell](#author-cell) | Left | 88px | Yes (by login) | FR-LIST-1, FR-LIST-8 |
 | Reviews | See [ReviewBadges](#reviewbadges) | Left | 152px | No | FR-LIST-3 |
 | Diff | `+adds` and `-dels` on line 1, `n files` on line 2, `--rd-font-size-100` | Right | 120px | Yes (adds + dels) | FR-LIST-1, FR-LIST-2, FR-LIST-8 |
-| Created | Date and time, `--rd-font-size-100` | Right | 128px | Yes | FR-LIST-1, FR-LIST-8 |
-| Updated | Date and time, `--rd-font-size-100` | Right | 128px | Yes | FR-LIST-1, FR-LIST-8 |
+| Created | Date and time, `--rd-font-size-100` | Right | 120px | Yes | FR-LIST-1, FR-LIST-8 |
+| Updated | Date and time, `--rd-font-size-100` | Right | 120px | Yes | FR-LIST-1, FR-LIST-8 |
 
 The table header text for the Number column is `#`.
 
@@ -372,7 +374,7 @@ Elements:
 - The title is `<a href target="_blank" rel="noopener noreferrer">` in `--rd-color-accent-fg`, underlined on hover and focus, followed by the external link icon and visually hidden text "(opens in a new tab)"
 - The link is rendered only when the URL starts with `https://github.com/` ([ARCHITECTURE.md](ARCHITECTURE.md#security)); otherwise the title is plain text
 - Diff: `+120` in `--rd-color-success-fg`, `-30` in `--rd-color-danger-fg`, and `4 files` in `--rd-color-fg-muted`. The sort key is additions + deletions ([GLOSSARY.md](GLOSSARY.md#diff-stat-diffstat)); the file count does not affect order
-- The Repository column is shown even when grouping by repository, to keep one column set
+- Columns that repeat the group heading are hidden (FR-LIST-11): Owner when grouping by organization; Owner and Repository when grouping by repository. The Title column takes the freed width
 
 Target size: every button in this table and in the header, QueryBar, StatusBar, and PAT input screen is at least 24px by 24px (2.5.8); `--rd-control-height` makes buttons 32px tall, and header sort buttons fill a cell at least 32px tall.
 

@@ -41,9 +41,9 @@ Users browse the list of PRs matching a search query, check their review status,
 
 | ID | Requirement |
 |----|-------------|
-| FR-QUERY-1 | When no search query is saved, use the default query `is:pr review-requested:@me state:open archived:false` |
+| FR-QUERY-1 | When the page URL has no search query, use the default query `is:pr review-requested:@me state:open archived:false -is:draft` |
 | FR-QUERY-2 | The user can edit and apply the search query. Applying it fetches PRs again |
-| FR-QUERY-3 | The search query persists across reloads and future visits |
+| FR-QUERY-3 | The search query is kept in the page URL, so it persists across reloads, can be bookmarked, and pages with different search queries can be open at the same time. Browser back and forward restore the previous search query |
 | FR-QUERY-4 | The user can reset the search query to the default query |
 | FR-QUERY-5 | An empty search query cannot be applied |
 
@@ -51,22 +51,23 @@ Users browse the list of PRs matching a search query, check their review status,
 
 | ID | Requirement |
 |----|-------------|
-| FR-LIST-1 | For each PR, show the PR number, title, repository, author, diff stat, created date, and updated date |
+| FR-LIST-1 | For each PR, show the PR number, title, organization, repository, author, diff stat, created date, and updated date |
 | FR-LIST-2 | Show the diff stat as added lines (+additions), deleted lines (-deletions), and the number of changed files |
 | FR-LIST-3 | For each PR, show the latest review result per reviewer (Approved / Changes requested / Commented / Dismissed) |
 | FR-LIST-4 | The PR page on GitHub can be opened in a new tab, e.g. from the PR title |
 | FR-LIST-5 | The grouping can be chosen from "None", "Organization", and "Repository". The choice persists across reloads |
 | FR-LIST-6 | Clicking a column header makes that column the sort key. Clicking the same column again reverses the sort direction (ascending/descending). The choice persists across reloads |
 | FR-LIST-7 | The initial sort key is the updated date, and the initial sort direction is descending |
-| FR-LIST-8 | Sortable columns are PR number, title, repository, author, diff stat (additions + deletions), created date, and updated date |
+| FR-LIST-8 | Sortable columns are PR number, title, organization, repository, author, diff stat (additions + deletions), created date, and updated date |
 | FR-LIST-9 | When grouped, the sort from FR-LIST-6 applies within each group. Groups are ordered by group name ascending, and each group heading shows its PR count |
 | FR-LIST-10 | When the search returns no results, say so |
+| FR-LIST-11 | When grouped, columns that repeat the group heading are hidden: the organization column when grouping by organization, and the organization and repository columns when grouping by repository |
 
 ### Cache
 
 | ID | Requirement |
 |----|-------------|
-| FR-CACHE-1 | Store fetch results as a cache |
+| FR-CACHE-1 | Store fetch results as caches, one per search query, for the five most recently fetched search queries |
 | FR-CACHE-2 | On access, if a cache exists for the current search query, show it without waiting for the API response |
 | FR-CACHE-3 | After showing the cache, automatically run a background refresh and replace the list when it completes |
 | FR-CACHE-4 | The user can fetch PRs again at any time with a manual refresh button |
@@ -87,7 +88,7 @@ Users browse the list of PRs matching a search query, check their review status,
 | NFR-1 | Works on the latest versions of major browsers (Chrome, Firefox, Safari, Edge) |
 | NFR-2 | Consists only of static files and can be hosted on GitHub Pages. Requires no server or proxy of its own |
 | NFR-3 | Connects only to github.com (`https://api.github.com`) |
-| NFR-4 | The PAT, search query, cache, and view settings are stored in the browser's localStorage. No other data is sent anywhere |
+| NFR-4 | The PAT, cache, and view settings are stored in the browser's localStorage, and the search query is kept in the page URL. No other data is sent anywhere |
 | NFR-5 | Because the PAT is stored in the browser, no third-party scripts are loaded at runtime, and a CSP restricts connection destinations |
 | NFR-6 | A single fetch handles at most the GitHub search API limit (1,000 results) |
 | NFR-7 | Implemented with TypeScript, Vite, and React, built with GitHub Actions and deployed to GitHub Pages |

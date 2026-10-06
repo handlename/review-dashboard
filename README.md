@@ -8,11 +8,11 @@ It runs entirely in the browser as a static site hosted on GitHub Pages, and tal
 
 ## Features
 
-- **Search-based list**: Shows PRs matching a GitHub search query. The default is `is:pr review-requested:@me state:open archived:false`
-- **Editable query**: Change the query at any time; it is remembered across reloads and visits
+- **Search-based list**: Shows PRs matching a GitHub search query. The default is `is:pr review-requested:@me state:open archived:false -is:draft`
+- **Editable query**: Change the query at any time; it is kept in the page URL (`?q=...`), so you can bookmark it and open several queries at once
 - **PR details at a glance**: PR number, title, repository, author, diff stat (+additions / -deletions / changed files), created and updated dates
 - **Review status**: The latest review result for each reviewer (Approved / Changes requested / Commented / Dismissed)
-- **Grouping and sorting**: Group by organization or repository, and sort by clicking column headers
+- **Grouping and sorting**: Group by organization or repository (the grouped columns are hidden), and sort by clicking column headers
 - **Instant display**: Cached results appear immediately on access, then refresh in the background
 - **One click to GitHub**: Open any PR on GitHub in a new tab
 
@@ -20,7 +20,7 @@ It runs entirely in the browser as a static site hosted on GitHub Pages, and tal
 
 - Authentication uses a Personal Access Token entered in the app. There is no OAuth login and no backend
 - PRs are fetched with the GitHub GraphQL API `search`
-- The token, query, cached results, and view settings are stored in your browser's localStorage and are never sent anywhere except `api.github.com`
+- The token, cached results, and view settings are stored in your browser's localStorage (the query lives in the URL), and are never sent anywhere except `api.github.com`
 - Only github.com is supported (GitHub Enterprise Server is not)
 
 ### Token permissions

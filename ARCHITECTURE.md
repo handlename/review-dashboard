@@ -54,14 +54,15 @@ src/
     viewSettings.ts  # Grouping, SortKey, SortDirection, ViewSettings and defaults
     sort.ts          # sortPullRequests(prs, sortKey, direction)
     group.ts         # groupPullRequests(prs, grouping)
-    cache.ts         # Cache type, cacheFor(cache, query)
+    cache.ts         # Cache type, cacheFor(cache, query), withCache(caches, cache, limit)
   infra/
     github.ts        # searchPullRequests(token, query, signal): GraphQL call and pagination
     githubMapper.ts  # GraphQL response → PullRequest conversion
     storage.ts       # localStorage reads and writes
+    url.ts           # Reads and writes the search query in the page URL (`q` parameter)
   app/
     usePullRequests.ts  # State for cache display, fetching, and errors
-    useSettings.ts      # Reads and writes the PAT, search query, and view settings
+    useSettings.ts      # Reads and writes the PAT and view settings
   ui/
     App.tsx
     TokenForm.tsx       # PAT input screen
@@ -103,11 +104,11 @@ type PullRequest = {
 };
 
 type Grouping = "none" | "owner" | "repository";
-type SortKey = "number" | "title" | "repository" | "author" | "diff" | "createdAt" | "updatedAt";
+type SortKey = "number" | "title" | "owner" | "repository" | "author" | "diff" | "createdAt" | "updatedAt";
 type SortDirection = "asc" | "desc";
 
 type Cache = {
-  readonly query: string;
+  readonly query: SearchQuery;
   readonly fetchedAt: string;
   readonly pullRequests: readonly PullRequest[];
 };
@@ -117,6 +118,7 @@ All types are readonly; state is updated by creating new values.
 Review results outside the displayed set, such as `PENDING`, are dropped during conversion in infra.
 `avatarUrl` values that do not start with `https://avatars.githubusercontent.com/` are converted to `null` in infra, so the UI never loads images from other hosts (see the CSP in [Security](#security)).
 Sorting by author compares `author.login`.
+Sorting by repository compares the repository name without the owner, as shown in the Repository column.
 
 ## GitHub API
 
@@ -204,11 +206,11 @@ When the storage format changes, bump the version and stop reading the old keys.
 | Key | Contents | Removed when |
 |-----|----------|--------------|
 | `review-dashboard:v1:token` | PAT | Log out |
-| `review-dashboard:v1:query` | Search query | Never |
 | `review-dashboard:v1:view` | View settings (JSON) | Never |
-| `review-dashboard:v1:cache` | Cache (JSON) | Log out; overwritten by a successful fetch for another search query |
+| `review-dashboard:v1:cache` | Caches (JSON array, newest first) | Log out; the oldest is dropped when a sixth search query is fetched |
 
-- The cache holds results for the most recent search query only
+- The caches hold results for the five most recently fetched search queries, one per search query. If saving all of them exceeds the quota, only as many of the newest as fit are saved
+- The search query is not stored in localStorage. It lives in the page URL as the `q` parameter (omitted for the default query), so pages with different search queries can be open at the same time. Applying a search query adds a history entry, and browser back and forward apply the search query of that entry
 - On read, parse the JSON and validate its shape; treat invalid values as absent
 - If localStorage is unavailable or a write fails because the quota is exceeded, the page keeps working (it just cannot save)
 
