@@ -1,5 +1,7 @@
 import type { Cache } from "../domain/cache";
+import { withCache } from "../domain/cache";
 import type { Actor, PullRequest, Review } from "../domain/pullRequest";
+import type { SearchQuery } from "../domain/searchQuery";
 import { createSearchQuery } from "../domain/searchQuery";
 import type { ViewSettings } from "../domain/viewSettings";
 
@@ -20,11 +22,12 @@ function read(key: string): string | null {
 	}
 }
 
-function write(key: string, value: string): void {
+function write(key: string, value: string): boolean {
 	try {
 		localStorage.setItem(key, value);
+		return true;
 	} catch {
-		// Ignored: see read().
+		return false;
 	}
 }
 
@@ -117,8 +120,9 @@ export function saveViewSettings(settings: ViewSettings): void {
 	write(KEYS.view, JSON.stringify(settings));
 }
 
-export function loadCache(): Cache | null {
-	const value = readJson(KEYS.cache);
+const CACHE_LIMIT = 5;
+
+function toCache(value: unknown): Cache | null {
 	if (
 		!isObject(value) ||
 		!isString(value.query) ||
@@ -135,8 +139,23 @@ export function loadCache(): Cache | null {
 	}
 }
 
+function loadCaches(): readonly Cache[] {
+	const value = readJson(KEYS.cache);
+	return Array.isArray(value) ? value.map(toCache).filter((cache) => cache !== null) : [];
+}
+
+export function loadCache(query: SearchQuery): Cache | null {
+	return loadCaches().find((cache) => cache.query === query) ?? null;
+}
+
 export function saveCache(cache: Cache): void {
-	write(KEYS.cache, JSON.stringify(cache));
+	const caches = withCache(loadCaches(), cache, CACHE_LIMIT);
+	// Large results can exceed the quota, so keep as many of the newest caches as fit.
+	for (let n = caches.length; n > 0; n--) {
+		if (write(KEYS.cache, JSON.stringify(caches.slice(0, n)))) {
+			return;
+		}
+	}
 }
 
 // View settings are kept across logouts.

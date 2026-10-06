@@ -48,9 +48,9 @@ export function usePullRequests(token: string | null, viewSettings: ViewSettings
 	// Leave Idle before paint, so Idle is never rendered.
 	useLayoutEffect(() => {
 		if (state.status === "Idle" && token !== null) {
-			dispatch({ type: "started", storedCache: loadCache() });
+			dispatch({ type: "started", storedCache: loadCache(state.query) });
 		}
-	}, [state.status, token]);
+	}, [state.status, state.query, token]);
 
 	// Background refresh right after showing the cache (FR-CACHE-3).
 	useEffect(() => {

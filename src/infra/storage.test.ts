@@ -107,38 +107,81 @@ describe("storage: cache", () => {
 			},
 		],
 	};
-	const store = (value: unknown) => localStorage.setItem("review-dashboard:v1:cache", JSON.stringify(value));
+	const store = (value: unknown) => localStorage.setItem("review-dashboard:v1:cache", JSON.stringify([value]));
+	const query = cache.query;
 	const pr = cache.pullRequests[0];
 
 	it("saveCache then loadCache round-trips", () => {
 		saveCache(cache);
-		expect(loadCache()).toEqual(cache);
+		expect(loadCache(query)).toEqual(cache);
+	});
+
+	it("keeps caches for several queries", () => {
+		const other = { ...cache, query: createSearchQuery("is:pr") };
+		saveCache(cache);
+		saveCache(other);
+		expect(loadCache(query)).toEqual(cache);
+		expect(loadCache(other.query)).toEqual(other);
+	});
+
+	it("keeps at most 5 caches, dropping the oldest", () => {
+		for (const q of ["q1", "q2", "q3", "q4", "q5", "q6"]) {
+			saveCache({ ...cache, query: createSearchQuery(q) });
+		}
+		expect(loadCache(createSearchQuery("q1"))).toBeNull();
+		expect(loadCache(createSearchQuery("q6"))).not.toBeNull();
+	});
+
+	it("loadCache returns null for a query without a cache", () => {
+		saveCache(cache);
+		expect(loadCache(createSearchQuery("is:pr"))).toBeNull();
+	});
+
+	it("loadCache returns null for a single cache object (old format)", () => {
+		localStorage.setItem("review-dashboard:v1:cache", JSON.stringify(cache));
+		expect(loadCache(query)).toBeNull();
+	});
+
+	it("saveCache keeps the newest caches that fit when the quota is exceeded", () => {
+		const limited = fakeStorage();
+		const setItem = limited.setItem;
+		limited.setItem = (key, value) => {
+			if (value.length > 1000) {
+				throw new DOMException("full", "QuotaExceededError");
+			}
+			setItem(key, value);
+		};
+		vi.stubGlobal("localStorage", limited);
+		saveCache({ ...cache, query: createSearchQuery("old") });
+		saveCache(cache);
+		expect(loadCache(query)).toEqual(cache);
+		expect(loadCache(createSearchQuery("old"))).toBeNull();
 	});
 
 	it("loadCache returns null for invalid JSON", () => {
 		localStorage.setItem("review-dashboard:v1:cache", "{not json");
-		expect(loadCache()).toBeNull();
+		expect(loadCache(query)).toBeNull();
 	});
 
 	it("loadCache returns null when query is empty (cannot build SearchQuery)", () => {
 		store({ ...cache, query: "  " });
-		expect(loadCache()).toBeNull();
+		expect(loadCache(query)).toBeNull();
 	});
 
 	it("loadCache returns null when a pull request lacks diffStat (old format)", () => {
 		const { diffStat: _, ...old } = pr;
 		store({ ...cache, pullRequests: [old] });
-		expect(loadCache()).toBeNull();
+		expect(loadCache(query)).toBeNull();
 	});
 
 	it("loadCache returns null when a review has an unknown state", () => {
 		store({ ...cache, pullRequests: [{ ...pr, latestReviews: [{ ...pr.latestReviews[0], state: "PENDING" }] }] });
-		expect(loadCache()).toBeNull();
+		expect(loadCache(query)).toBeNull();
 	});
 
 	it("loadCache returns null when pullRequests is not an array", () => {
 		store({ ...cache, pullRequests: {} });
-		expect(loadCache()).toBeNull();
+		expect(loadCache(query)).toBeNull();
 	});
 
 	it("saveCache does not throw when setItem throws (quota exceeded)", () => {
