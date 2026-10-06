@@ -106,10 +106,6 @@ button {
 	color: inherit;
 }
 
-.tabular-nums {
-	font-variant-numeric: tabular-nums;
-}
-
 .visually-hidden {
 	position: absolute;
 	width: 1px;
