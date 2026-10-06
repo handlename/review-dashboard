@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createSearchQuery } from "../domain/searchQuery";
-import { loadQuery, loadToken, loadViewSettings, saveQuery, saveToken, saveViewSettings } from "./storage";
+import type { Cache } from "../domain/cache";
+import { loadCache, loadQuery, loadToken, loadViewSettings, saveCache, saveQuery, saveToken, saveViewSettings } from "./storage";
 
 function fakeStorage(): Storage {
 	const map = new Map<string, string>();
@@ -101,5 +102,67 @@ describe("storage: view settings", () => {
 	it("loadViewSettings returns null when a field is missing (old format)", () => {
 		localStorage.setItem("review-dashboard:v1:view", JSON.stringify({ grouping: "none", sortKey: "diff" }));
 		expect(loadViewSettings()).toBeNull();
+	});
+});
+
+describe("storage: cache", () => {
+	const cache: Cache = {
+		query: createSearchQuery("is:pr author:@me"),
+		fetchedAt: "2026-09-28T05:05:00Z",
+		pullRequests: [
+			{
+				number: 1,
+				title: "Fix pagination bug",
+				url: "https://github.com/acme/web/pull/1",
+				repository: "acme/web",
+				owner: "acme",
+				author: null,
+				diffStat: { additions: 1, deletions: 2, changedFiles: 3 },
+				createdAt: "2026-09-27T01:02:00Z",
+				updatedAt: "2026-09-28T05:05:00Z",
+				latestReviews: [
+					{ reviewer: { login: "carol", avatarUrl: null }, state: "APPROVED", submittedAt: "2026-09-28T00:00:00Z" },
+					{ reviewer: null, state: "DISMISSED", submittedAt: "2026-09-28T01:00:00Z" },
+				],
+			},
+		],
+	};
+	const store = (value: unknown) => localStorage.setItem("review-dashboard:v1:cache", JSON.stringify(value));
+	const pr = cache.pullRequests[0];
+
+	it("saveCache then loadCache round-trips", () => {
+		saveCache(cache);
+		expect(loadCache()).toEqual(cache);
+	});
+
+	it("loadCache returns null for invalid JSON", () => {
+		localStorage.setItem("review-dashboard:v1:cache", "{not json");
+		expect(loadCache()).toBeNull();
+	});
+
+	it("loadCache returns null when query is empty (cannot build SearchQuery)", () => {
+		store({ ...cache, query: "  " });
+		expect(loadCache()).toBeNull();
+	});
+
+	it("loadCache returns null when a pull request lacks diffStat (old format)", () => {
+		const { diffStat: _, ...old } = pr;
+		store({ ...cache, pullRequests: [old] });
+		expect(loadCache()).toBeNull();
+	});
+
+	it("loadCache returns null when a review has an unknown state", () => {
+		store({ ...cache, pullRequests: [{ ...pr, latestReviews: [{ ...pr.latestReviews[0], state: "PENDING" }] }] });
+		expect(loadCache()).toBeNull();
+	});
+
+	it("loadCache returns null when pullRequests is not an array", () => {
+		store({ ...cache, pullRequests: {} });
+		expect(loadCache()).toBeNull();
+	});
+
+	it("saveCache does not throw when setItem throws (quota exceeded)", () => {
+		vi.stubGlobal("localStorage", throwingStorage());
+		expect(() => saveCache(cache)).not.toThrow();
 	});
 });

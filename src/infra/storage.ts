@@ -1,3 +1,5 @@
+import type { Cache } from "../domain/cache";
+import type { Actor, PullRequest, Review } from "../domain/pullRequest";
 import type { SearchQuery } from "../domain/searchQuery";
 import { createSearchQuery } from "../domain/searchQuery";
 import type { ViewSettings } from "../domain/viewSettings";
@@ -8,6 +10,7 @@ const KEYS = {
 	token: `${PREFIX}token`,
 	query: `${PREFIX}query`,
 	view: `${PREFIX}view`,
+	cache: `${PREFIX}cache`,
 } as const;
 
 // localStorage may be unavailable or full; the page keeps working without saving.
@@ -45,6 +48,42 @@ function isObject(value: unknown): value is Record<string, unknown> {
 
 function isOneOf<T extends string>(value: unknown, options: readonly T[]): value is T {
 	return options.includes(value as T);
+}
+
+const isString = (value: unknown): value is string => typeof value === "string";
+const isNumber = (value: unknown): value is number => typeof value === "number";
+
+function isActor(value: unknown): value is Actor {
+	return isObject(value) && isString(value.login) && (value.avatarUrl === null || isString(value.avatarUrl));
+}
+
+function isReview(value: unknown): value is Review {
+	return (
+		isObject(value) &&
+		(value.reviewer === null || isActor(value.reviewer)) &&
+		isOneOf(value.state, ["APPROVED", "CHANGES_REQUESTED", "COMMENTED", "DISMISSED"]) &&
+		isString(value.submittedAt)
+	);
+}
+
+function isPullRequest(value: unknown): value is PullRequest {
+	return (
+		isObject(value) &&
+		isNumber(value.number) &&
+		isString(value.title) &&
+		isString(value.url) &&
+		isString(value.repository) &&
+		isString(value.owner) &&
+		(value.author === null || isActor(value.author)) &&
+		isObject(value.diffStat) &&
+		isNumber(value.diffStat.additions) &&
+		isNumber(value.diffStat.deletions) &&
+		isNumber(value.diffStat.changedFiles) &&
+		isString(value.createdAt) &&
+		isString(value.updatedAt) &&
+		Array.isArray(value.latestReviews) &&
+		value.latestReviews.every(isReview)
+	);
 }
 
 export function loadToken(): string | null {
@@ -86,4 +125,26 @@ export function loadViewSettings(): ViewSettings | null {
 
 export function saveViewSettings(settings: ViewSettings): void {
 	write(KEYS.view, JSON.stringify(settings));
+}
+
+export function loadCache(): Cache | null {
+	const value = readJson(KEYS.cache);
+	if (
+		!isObject(value) ||
+		!isString(value.query) ||
+		!isString(value.fetchedAt) ||
+		!Array.isArray(value.pullRequests) ||
+		!value.pullRequests.every(isPullRequest)
+	) {
+		return null;
+	}
+	try {
+		return { query: createSearchQuery(value.query), fetchedAt: value.fetchedAt, pullRequests: value.pullRequests };
+	} catch {
+		return null;
+	}
+}
+
+export function saveCache(cache: Cache): void {
+	write(KEYS.cache, JSON.stringify(cache));
 }
