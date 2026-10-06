@@ -183,3 +183,244 @@ button {
 		animation: none;
 	}
 }
+
+/* PR table */
+
+.table-wrapper {
+	overflow-x: auto;
+	border: var(--rd-border-width-thin) solid var(--rd-color-border-default);
+	border-radius: var(--rd-radius-medium);
+}
+
+.pr-table {
+	width: 100%;
+	min-width: var(--rd-table-min-width);
+	table-layout: fixed;
+	border-collapse: collapse;
+}
+
+.pr-table th {
+	padding: 0;
+	background: var(--rd-color-canvas-subtle);
+	font-size: var(--rd-font-size-100);
+	font-weight: var(--rd-font-weight-semibold);
+	text-align: left;
+	border-bottom: var(--rd-border-width-thin) solid var(--rd-color-border-default);
+}
+
+.pr-table th.col-reviews {
+	padding: 0 var(--rd-space-2);
+}
+
+.sort-button {
+	display: flex;
+	align-items: center;
+	gap: var(--rd-space-1);
+	width: 100%;
+	min-height: var(--rd-control-height);
+	padding: 0 var(--rd-space-2);
+	background: none;
+	border: 0;
+	font-size: inherit;
+	font-weight: inherit;
+	text-align: inherit;
+	cursor: pointer;
+}
+
+.pr-table td {
+	height: 48px; /* acts as a minimum height for table cells */
+	padding: var(--rd-space-2);
+	vertical-align: middle;
+	overflow-wrap: anywhere;
+	border-bottom: var(--rd-border-width-thin) solid var(--rd-color-border-default);
+}
+
+.pr-table tbody tr:last-child td {
+	border-bottom: 0;
+}
+
+.pr-table tbody tr:hover {
+	background: var(--rd-color-row-hover);
+}
+
+.col-number {
+	width: 56px;
+}
+.col-title {
+	min-width: 160px;
+}
+.col-repository {
+	width: 144px;
+}
+.col-author {
+	width: 88px;
+}
+.col-reviews {
+	width: 152px;
+}
+.col-diff {
+	width: 120px;
+}
+.col-created,
+.col-updated {
+	width: 128px;
+}
+
+.pr-table th.col-number .sort-button,
+.pr-table th.col-diff .sort-button,
+.pr-table th.col-created .sort-button,
+.pr-table th.col-updated .sort-button {
+	justify-content: flex-end;
+}
+
+.pr-table td.col-number,
+.pr-table td.col-diff,
+.pr-table td.col-created,
+.pr-table td.col-updated {
+	text-align: right;
+	font-size: var(--rd-font-size-100);
+	font-variant-numeric: tabular-nums;
+	overflow-wrap: normal;
+}
+
+.pr-table a {
+	color: var(--rd-color-accent-fg);
+	text-decoration: none;
+}
+
+.pr-table a:hover,
+.pr-table a:focus-visible {
+	text-decoration: underline;
+}
+
+.diff-additions {
+	color: var(--rd-color-success-fg);
+}
+.diff-deletions {
+	color: var(--rd-color-danger-fg);
+}
+.diff-files {
+	color: var(--rd-color-fg-muted);
+}
+
+/* Avatars */
+
+.author {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: var(--rd-space-1);
+}
+
+.author-login {
+	font-size: var(--rd-font-size-100);
+	color: var(--rd-color-fg-muted);
+}
+
+.avatar {
+	display: block;
+	width: 20px;
+	height: 20px;
+	border-radius: var(--rd-radius-full);
+	color: var(--rd-color-fg-muted);
+	flex: none;
+}
+
+.avatar-placeholder {
+	background: var(--rd-color-canvas-inset);
+	overflow: hidden;
+}
+
+.avatar-image {
+	display: block;
+	width: 20px;
+	height: 20px;
+	opacity: 0;
+}
+
+.avatar-image.is-loaded {
+	opacity: 1;
+}
+
+/* Review badges */
+
+.review-badges {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--rd-space-1);
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.review-badges li {
+	width: 20px;
+	height: 20px;
+}
+
+.review-badge {
+	position: relative;
+	display: block;
+	width: 20px;
+	height: 20px;
+}
+
+.review-badge .review-icon {
+	position: absolute;
+	right: -4px;
+	bottom: -4px;
+	border-radius: var(--rd-radius-full);
+	box-shadow: 0 0 0 2px var(--rd-color-canvas-default);
+}
+
+.review-badge-more {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 20px;
+	height: 20px;
+	border-radius: var(--rd-radius-full);
+	background: var(--rd-color-canvas-subtle);
+	font-size: var(--rd-font-size-100);
+}
+
+.review-icon-approved {
+	color: var(--rd-color-success-emphasis);
+}
+.review-icon-changes-requested {
+	color: var(--rd-color-danger-emphasis);
+}
+.review-icon-commented,
+.review-icon-dismissed {
+	color: var(--rd-color-neutral-emphasis);
+}
+
+.review-icon-glyph {
+	fill: var(--rd-color-fg-on-emphasis);
+	stroke: var(--rd-color-fg-on-emphasis);
+}
+
+@media (forced-colors: active) {
+	.review-icon {
+		color: CanvasText;
+	}
+	.review-icon-glyph {
+		fill: Canvas;
+		stroke: Canvas;
+	}
+}
+
+/* Group sections */
+
+.group-section {
+	margin-top: var(--rd-space-5);
+}
+
+.group-heading {
+	margin-bottom: var(--rd-space-2);
+	font-size: var(--rd-font-size-300);
+}
+
+.group-count {
+	color: var(--rd-color-fg-muted);
+}

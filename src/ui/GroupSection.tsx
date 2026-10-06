@@ -11,9 +11,9 @@ export function GroupSection(props: {
 }) {
 	const { name, ...table } = props;
 	return (
-		<section>
-			<h2>
-				{name} <span>({props.pullRequests.length})</span>
+		<section className="group-section">
+			<h2 className="group-heading">
+				{name} <span className="group-count">({props.pullRequests.length})</span>
 			</h2>
 			<PullRequestTable {...table} />
 		</section>
