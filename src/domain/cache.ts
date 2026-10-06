@@ -6,3 +6,8 @@ export type Cache = {
 	readonly fetchedAt: string;
 	readonly pullRequests: readonly PullRequest[];
 };
+
+// A cache for another search query is never shown (FR-CACHE-6).
+export function cacheFor(cache: Cache | null, query: SearchQuery): Cache | null {
+	return cache !== null && cache.query === query ? cache : null;
+}
