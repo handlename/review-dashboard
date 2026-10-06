@@ -12,6 +12,9 @@ function cspPlugin(): Plugin {
 		apply: "build",
 		// Replace the string instead of returning a tag descriptor, which would escape the quotes as &#39;.
 		transformIndexHtml(html) {
+			if (!html.includes("<head>")) {
+				throw new Error("cspPlugin: <head> not found in index.html");
+			}
 			return html.replace(
 				"<head>",
 				`<head>\n    <meta http-equiv="Content-Security-Policy" content="${CSP}">`,
