@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useLayoutEffect, useMemo, useReducer } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useReducer, useRef } from "react";
 import { groupPullRequests } from "../domain/group";
 import type { PullRequest } from "../domain/pullRequest";
 import type { SearchQuery } from "../domain/searchQuery";
@@ -26,6 +26,16 @@ export function usePullRequests(token: string | null, viewSettings: ViewSettings
 	const [state, dispatch] = useReducer(pullRequestsReducer, null, () =>
 		initialPullRequestsState(loadQuery() ?? DEFAULT_QUERY),
 	);
+
+	// The token is owned by useSettings; this hook only follows its changes.
+	const previousToken = useRef(token);
+	useLayoutEffect(() => {
+		if (previousToken.current === token) {
+			return;
+		}
+		previousToken.current = token;
+		dispatch(token === null ? { type: "loggedOut" } : { type: "tokenSaved" });
+	}, [token]);
 
 	// Leave Idle before paint, so Idle is never rendered.
 	useLayoutEffect(() => {

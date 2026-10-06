@@ -26,10 +26,20 @@ function statusView(state: PullRequestsState): StatusView | null {
 	}
 }
 
-export function StatusBar(props: {
-	state: PullRequestsState;
-	onRefresh(): void;
-}) {
+export function errorMessage(error: FetchFailure): string {
+	switch (error.kind) {
+		case "Network":
+			return "Could not reach GitHub. Check your connection and press Refresh.";
+		case "RateLimit":
+			return "GitHub rate limit reached. Try again later.";
+		case "Unauthorized":
+			return "Your token is invalid or expired.";
+		case "Other":
+			return `GitHub returned an error: ${error.message}`;
+	}
+}
+
+export function StatusBar(props: { state: PullRequestsState; onRefresh(): void; onLogout(): void }) {
 	const view = statusView(props.state);
 	if (view === null) {
 		return null;
@@ -56,7 +66,10 @@ export function StatusBar(props: {
 			>
 				Refresh
 			</button>
-			{view.error !== null && <p>{view.error.message}</p>}
+			<button type="button" onClick={props.onLogout}>
+				Log out
+			</button>
+			{view.error !== null && <p>{errorMessage(view.error)}</p>}
 		</div>
 	);
 }

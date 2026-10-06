@@ -1,7 +1,7 @@
 import { useCallback, useState } from "react";
 import type { Grouping, SortKey, ViewSettings } from "../domain/viewSettings";
 import { DEFAULT_VIEW_SETTINGS, toggleSort as toggleSortKey } from "../domain/viewSettings";
-import { loadToken, loadViewSettings, saveToken as storeToken, saveViewSettings } from "../infra/storage";
+import { clearSession, loadToken, loadViewSettings, saveToken as storeToken, saveViewSettings } from "../infra/storage";
 
 export function useSettings() {
 	const [token, setToken] = useState<string | null>(loadToken);
@@ -12,6 +12,11 @@ export function useSettings() {
 	const saveToken = useCallback((value: string) => {
 		storeToken(value);
 		setToken(value);
+	}, []);
+
+	const logout = useCallback(() => {
+		clearSession();
+		setToken(null);
 	}, []);
 
 	const updateViewSettings = useCallback((next: ViewSettings) => {
@@ -29,5 +34,5 @@ export function useSettings() {
 		[viewSettings, updateViewSettings],
 	);
 
-	return { token, saveToken, viewSettings, setGrouping, toggleSort };
+	return { token, saveToken, logout, viewSettings, setGrouping, toggleSort };
 }

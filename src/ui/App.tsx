@@ -94,15 +94,17 @@ function PullRequestList(props: {
 }
 
 export function App() {
-	const { token, saveToken, viewSettings, setGrouping, toggleSort } =
-		useSettings();
+	const { token, saveToken, logout, viewSettings, setGrouping, toggleSort } = useSettings();
 	const { state, groups, applyQuery, refresh } = usePullRequests(token, viewSettings);
+
+	const unauthorized = state.status === "Unauthorized";
+	const dashboard = token !== null && !unauthorized;
 
 	return (
 		<>
 			<header>
 				<h1 tabIndex={-1}>review-dashboard</h1>
-				{token !== null && (
+				{dashboard && (
 					<GroupingSelect
 						grouping={viewSettings.grouping}
 						onChange={setGrouping}
@@ -110,12 +112,12 @@ export function App() {
 				)}
 			</header>
 			<main>
-				{token === null ? (
-					<TokenForm onSave={saveToken} />
+				{!dashboard ? (
+					<TokenForm onSave={saveToken} unauthorized={unauthorized} onLogout={logout} />
 				) : (
 					<>
 						<QueryBar query={state.query} onApply={applyQuery} />
-						<StatusBar state={state} onRefresh={refresh} />
+						<StatusBar state={state} onRefresh={refresh} onLogout={logout} />
 						<PullRequestList
 							state={state}
 							groups={groups}

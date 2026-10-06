@@ -1,12 +1,14 @@
 import type { FormEvent } from "react";
 import { useId, useRef, useState } from "react";
 
-export function TokenForm(props: { onSave(token: string): void }) {
+export function TokenForm(props: { onSave(token: string): void; unauthorized: boolean; onLogout(): void }) {
 	const [value, setValue] = useState("");
 	const [empty, setEmpty] = useState(false);
 	const inputRef = useRef<HTMLInputElement>(null);
 	const inputId = useId();
 	const errorId = useId();
+
+	const error = empty ? "Enter a token." : props.unauthorized ? "Your token is invalid or expired." : null;
 
 	function handleSubmit(event: FormEvent) {
 		event.preventDefault();
@@ -27,7 +29,7 @@ export function TokenForm(props: { onSave(token: string): void }) {
 				api.github.com.
 			</p>
 			<form onSubmit={handleSubmit} noValidate>
-				{empty && <p id={errorId}>Enter a token.</p>}
+				{error !== null && <p id={errorId}>{error}</p>}
 				<label htmlFor={inputId}>Personal access token</label>
 				<input
 					ref={inputRef}
@@ -37,10 +39,15 @@ export function TokenForm(props: { onSave(token: string): void }) {
 					spellCheck={false}
 					value={value}
 					onChange={(e) => setValue(e.target.value)}
-					aria-invalid={empty || undefined}
-					aria-describedby={empty ? errorId : undefined}
+					aria-invalid={error !== null || undefined}
+					aria-describedby={error !== null ? errorId : undefined}
 				/>
 				<button type="submit">Save</button>
+				{props.unauthorized && (
+					<button type="button" onClick={props.onLogout}>
+						Log out
+					</button>
+				)}
 			</form>
 			<p>
 				Classic token: grant the repo scope to include private repositories.
