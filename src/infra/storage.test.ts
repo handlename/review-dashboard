@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createSearchQuery } from "../domain/searchQuery";
-import { loadQuery, loadToken, saveQuery, saveToken } from "./storage";
+import { loadQuery, loadToken, loadViewSettings, saveQuery, saveToken, saveViewSettings } from "./storage";
 
 function fakeStorage(): Storage {
 	const map = new Map<string, string>();
@@ -74,5 +74,32 @@ describe("storage: token and query", () => {
 		vi.stubGlobal("localStorage", throwingStorage());
 		expect(() => saveToken("ghp_example")).not.toThrow();
 		expect(() => saveQuery(createSearchQuery("is:pr"))).not.toThrow();
+	});
+});
+
+describe("storage: view settings", () => {
+	it("saveViewSettings then loadViewSettings round-trips", () => {
+		const settings = { grouping: "repository", sortKey: "diff", sortDirection: "asc" } as const;
+		saveViewSettings(settings);
+		expect(loadViewSettings()).toEqual(settings);
+	});
+
+	it("loadViewSettings returns null for invalid JSON", () => {
+		localStorage.setItem("review-dashboard:v1:view", "{not json");
+		expect(loadViewSettings()).toBeNull();
+	});
+
+	it.each([
+		{ grouping: "org", sortKey: "diff", sortDirection: "asc" },
+		{ grouping: "none", sortKey: "reviews", sortDirection: "asc" },
+		{ grouping: "none", sortKey: "diff", sortDirection: "up" },
+	])("loadViewSettings returns null for an unknown grouping / sortKey / sortDirection value (old format) %#", (value) => {
+		localStorage.setItem("review-dashboard:v1:view", JSON.stringify(value));
+		expect(loadViewSettings()).toBeNull();
+	});
+
+	it("loadViewSettings returns null when a field is missing (old format)", () => {
+		localStorage.setItem("review-dashboard:v1:view", JSON.stringify({ grouping: "none", sortKey: "diff" }));
+		expect(loadViewSettings()).toBeNull();
 	});
 });
