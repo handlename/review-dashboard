@@ -1,4 +1,5 @@
 import type { PullRequest } from "../domain/pullRequest";
+import type { SortDirection, SortKey } from "../domain/viewSettings";
 import { formatDateTime, formatFileCount, formatNumber } from "./format";
 import { ReviewBadges } from "./ReviewBadges";
 
@@ -19,21 +20,44 @@ function Title(props: { pr: PullRequest }) {
 	);
 }
 
+const COLUMNS: readonly { readonly key: SortKey | null; readonly label: string }[] = [
+	{ key: "number", label: "#" },
+	{ key: "title", label: "Title" },
+	{ key: "repository", label: "Repository" },
+	{ key: "author", label: "Author" },
+	{ key: null, label: "Reviews" },
+	{ key: "diff", label: "Diff" },
+	{ key: "createdAt", label: "Created" },
+	{ key: "updatedAt", label: "Updated" },
+];
+
 export function PullRequestTable(props: {
 	pullRequests: readonly PullRequest[];
+	sortKey: SortKey;
+	sortDirection: SortDirection;
+	onSort(key: SortKey): void;
 }) {
 	return (
 		<table>
 			<thead>
 				<tr>
-					<th scope="col">#</th>
-					<th scope="col">Title</th>
-					<th scope="col">Repository</th>
-					<th scope="col">Author</th>
-					<th scope="col">Reviews</th>
-					<th scope="col">Diff</th>
-					<th scope="col">Created</th>
-					<th scope="col">Updated</th>
+					{COLUMNS.map(({ key, label }) => (
+						<th
+							key={label}
+							scope="col"
+							aria-sort={
+								key === props.sortKey ? (props.sortDirection === "asc" ? "ascending" : "descending") : undefined
+							}
+						>
+							{key === null ? (
+								label
+							) : (
+								<button type="button" onClick={() => props.onSort(key)}>
+									{label}
+								</button>
+							)}
+						</th>
+					))}
 				</tr>
 			</thead>
 			<tbody>

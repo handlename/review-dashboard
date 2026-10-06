@@ -1,38 +1,103 @@
+import { useId } from "react";
 import type { PullRequestsState } from "../app/pullRequestsReducer";
 import { usePullRequests } from "../app/usePullRequests";
 import { useSettings } from "../app/useSettings";
-import type { PullRequest } from "../domain/pullRequest";
+import type { PullRequestGroup } from "../domain/group";
+import type { Grouping, SortKey, ViewSettings } from "../domain/viewSettings";
+import { GroupSection } from "./GroupSection";
 import { PullRequestTable } from "./PullRequestTable";
 import { QueryBar } from "./QueryBar";
 import { StatusBar } from "./StatusBar";
 import { TokenForm } from "./TokenForm";
 
-function PullRequestList(props: { state: PullRequestsState; pullRequests: readonly PullRequest[] | null }) {
-	const { state, pullRequests } = props;
+const GROUPING_OPTIONS: readonly {
+	readonly value: Grouping;
+	readonly label: string;
+}[] = [
+	{ value: "none", label: "None" },
+	{ value: "owner", label: "Organization" },
+	{ value: "repository", label: "Repository" },
+];
+
+function GroupingSelect(props: {
+	grouping: Grouping;
+	onChange(grouping: Grouping): void;
+}) {
+	const id = useId();
+	return (
+		<div>
+			<label htmlFor={id}>Group by</label>
+			<select
+				id={id}
+				value={props.grouping}
+				onChange={(e) => props.onChange(e.target.value as Grouping)}
+			>
+				{GROUPING_OPTIONS.map(({ value, label }) => (
+					<option key={value} value={value}>
+						{label}
+					</option>
+				))}
+			</select>
+		</div>
+	);
+}
+
+function PullRequestList(props: {
+	state: PullRequestsState;
+	groups: readonly PullRequestGroup[] | null;
+	viewSettings: ViewSettings;
+	onSort(key: SortKey): void;
+}) {
+	const { state, groups, viewSettings, onSort } = props;
 	switch (state.status) {
 		case "Fetching":
 			return <p>Loading pull requests...</p>;
 		case "Error":
 			return <p>Could not load pull requests.</p>;
-		default:
-			if (pullRequests === null) {
+		default: {
+			if (groups === null) {
 				return null;
 			}
-			if (pullRequests.length === 0) {
+			const sort = {
+				sortKey: viewSettings.sortKey,
+				sortDirection: viewSettings.sortDirection,
+				onSort,
+			};
+			if (groups.every((group) => group.pullRequests.length === 0)) {
 				return <p>No pull requests match this query.</p>;
 			}
-			return <PullRequestTable pullRequests={pullRequests} />;
+			if (viewSettings.grouping === "none") {
+				return (
+					<PullRequestTable pullRequests={groups[0].pullRequests} {...sort} />
+				);
+			}
+			return groups.map((group) => (
+				<GroupSection
+					key={group.name}
+					name={group.name}
+					pullRequests={group.pullRequests}
+					{...sort}
+				/>
+			));
+		}
 	}
 }
 
 export function App() {
-	const { token, saveToken } = useSettings();
-	const { state, pullRequests, applyQuery } = usePullRequests(token);
+	const { token, saveToken, viewSettings, setGrouping, toggleSort } =
+		useSettings();
+	const { state, groups, applyQuery } = usePullRequests(token, viewSettings);
 
 	return (
 		<>
 			<header>
 				<h1 tabIndex={-1}>review-dashboard</h1>
+				{token !== null && (
+					<GroupingSelect
+						grouping={viewSettings.grouping}
+						onChange={setGrouping}
+					/>
+				)}
 			</header>
 			<main>
 				{token === null ? (
@@ -41,7 +106,12 @@ export function App() {
 					<>
 						<QueryBar query={state.query} onApply={applyQuery} />
 						<StatusBar state={state} />
-						<PullRequestList state={state} pullRequests={pullRequests} />
+						<PullRequestList
+							state={state}
+							groups={groups}
+							viewSettings={viewSettings}
+							onSort={toggleSort}
+						/>
 					</>
 				)}
 			</main>

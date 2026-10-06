@@ -1,7 +1,10 @@
-import { useCallback, useEffect, useLayoutEffect, useReducer } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useReducer } from "react";
+import { groupPullRequests } from "../domain/group";
 import type { PullRequest } from "../domain/pullRequest";
 import type { SearchQuery } from "../domain/searchQuery";
 import { DEFAULT_QUERY } from "../domain/searchQuery";
+import { sortPullRequests } from "../domain/sort";
+import type { ViewSettings } from "../domain/viewSettings";
 import { FetchError, searchPullRequests } from "../infra/github";
 import { loadQuery, saveQuery } from "../infra/storage";
 import type { PullRequestsState } from "./pullRequestsReducer";
@@ -16,7 +19,7 @@ function listOf(state: PullRequestsState): readonly PullRequest[] | null {
 	}
 }
 
-export function usePullRequests(token: string | null) {
+export function usePullRequests(token: string | null, viewSettings: ViewSettings) {
 	const [state, dispatch] = useReducer(pullRequestsReducer, null, () =>
 		initialPullRequestsState(loadQuery() ?? DEFAULT_QUERY),
 	);
@@ -80,5 +83,15 @@ export function usePullRequests(token: string | null) {
 		dispatch({ type: "queryApplied", query: next });
 	}, []);
 
-	return { state, pullRequests: listOf(state), applyQuery };
+	const pullRequests = listOf(state);
+	const { grouping, sortKey, sortDirection } = viewSettings;
+	const groups = useMemo(
+		() =>
+			pullRequests === null
+				? null
+				: groupPullRequests(sortPullRequests(pullRequests, sortKey, sortDirection), grouping),
+		[pullRequests, grouping, sortKey, sortDirection],
+	);
+
+	return { state, pullRequests, groups, applyQuery };
 }
