@@ -2,9 +2,9 @@ import { describe, expect, it } from "vitest";
 import { DEFAULT_QUERY, createSearchQuery } from "./searchQuery";
 
 describe("searchQuery", () => {
-	it('DEFAULT_QUERY equals "is:pr review-requested:@me state:open archived:false"', () => {
+	it('DEFAULT_QUERY equals "is:pr review-requested:@me state:open archived:false -is:draft"', () => {
 		expect(DEFAULT_QUERY).toBe(
-			"is:pr review-requested:@me state:open archived:false",
+			"is:pr review-requested:@me state:open archived:false -is:draft",
 		);
 	});
 

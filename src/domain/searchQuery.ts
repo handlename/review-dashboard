@@ -12,5 +12,5 @@ export function createSearchQuery(input: string): SearchQuery {
 }
 
 export const DEFAULT_QUERY: SearchQuery = createSearchQuery(
-	"is:pr review-requested:@me state:open archived:false",
+	"is:pr review-requested:@me state:open archived:false -is:draft",
 );
