@@ -1,0 +1,185 @@
+:root {
+	color-scheme: light dark;
+
+	--rd-color-fg-default: #1f2328;
+	--rd-color-fg-muted: #59636e;
+	--rd-color-fg-on-emphasis: #ffffff;
+	--rd-color-canvas-default: #ffffff;
+	--rd-color-canvas-subtle: #f6f8fa;
+	--rd-color-canvas-inset: #eff2f5;
+	--rd-color-row-hover: #f0f3f6;
+	--rd-color-border-default: #d1d9e0;
+	--rd-color-border-control: #818b98;
+	--rd-color-accent-fg: #0969da;
+	--rd-color-accent-emphasis: #0969da;
+	--rd-color-success-fg: #1a7f37;
+	--rd-color-success-emphasis: #1f883d;
+	--rd-color-danger-fg: #d1242f;
+	--rd-color-danger-emphasis: #cf222e;
+	--rd-color-neutral-emphasis: #59636e;
+	--rd-color-focus: #0969da;
+
+	--rd-font-family-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+	--rd-font-family-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+	--rd-font-size-100: 12px;
+	--rd-font-size-200: 14px;
+	--rd-font-size-300: 16px;
+	--rd-font-size-400: 20px;
+	--rd-font-size-500: 24px;
+	--rd-line-height-tight: 1.25;
+	--rd-line-height-default: 1.5;
+	--rd-font-weight-normal: 400;
+	--rd-font-weight-semibold: 600;
+
+	--rd-space-0: 0;
+	--rd-space-1: 4px;
+	--rd-space-2: 8px;
+	--rd-space-3: 12px;
+	--rd-space-4: 16px;
+	--rd-space-5: 24px;
+	--rd-space-6: 32px;
+	--rd-space-7: 40px;
+
+	--rd-radius-medium: 6px;
+	--rd-radius-full: 50%;
+	--rd-border-width-thin: 1px;
+	--rd-border-width-focus: 2px;
+	--rd-control-height: 32px;
+
+	--rd-layout-max-width: 1280px;
+	--rd-layout-gutter: 24px;
+	--rd-table-min-width: 976px;
+}
+
+@media (prefers-color-scheme: dark) {
+	:root {
+		--rd-color-fg-default: #e6edf3;
+		--rd-color-fg-muted: #9198a1;
+		--rd-color-fg-on-emphasis: #ffffff;
+		--rd-color-canvas-default: #0d1117;
+		--rd-color-canvas-subtle: #151b23;
+		--rd-color-canvas-inset: #010409;
+		--rd-color-row-hover: #1c222b;
+		--rd-color-border-default: #3d444d;
+		--rd-color-border-control: #656c76;
+		--rd-color-accent-fg: #4493f8;
+		--rd-color-accent-emphasis: #1f6feb;
+		--rd-color-success-fg: #3fb950;
+		--rd-color-success-emphasis: #238636;
+		--rd-color-danger-fg: #f85149;
+		--rd-color-danger-emphasis: #da3633;
+		--rd-color-neutral-emphasis: #656c76;
+		--rd-color-focus: #1f6feb;
+	}
+}
+
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+}
+
+body {
+	margin: 0;
+	background: var(--rd-color-canvas-default);
+	color: var(--rd-color-fg-default);
+	font-family: var(--rd-font-family-sans);
+	font-size: var(--rd-font-size-200);
+	line-height: var(--rd-line-height-default);
+}
+
+h1,
+h2 {
+	margin: 0;
+	font-weight: var(--rd-font-weight-semibold);
+	line-height: var(--rd-line-height-tight);
+}
+
+p {
+	margin: 0;
+}
+
+input,
+select,
+button {
+	font: inherit;
+	color: inherit;
+}
+
+.tabular-nums {
+	font-variant-numeric: tabular-nums;
+}
+
+.visually-hidden {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	white-space: nowrap;
+	border: 0;
+}
+
+.button {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--rd-space-1);
+	min-height: var(--rd-control-height);
+	padding: 0 var(--rd-space-3);
+	border-radius: var(--rd-radius-medium);
+	font-size: var(--rd-font-size-200);
+	font-weight: var(--rd-font-weight-semibold);
+	cursor: pointer;
+}
+
+.button-primary {
+	background: var(--rd-color-accent-emphasis);
+	color: var(--rd-color-fg-on-emphasis);
+	border: var(--rd-border-width-thin) solid transparent;
+}
+
+.button-secondary {
+	background: var(--rd-color-canvas-subtle);
+	color: var(--rd-color-fg-default);
+	border: var(--rd-border-width-thin) solid var(--rd-color-border-control);
+}
+
+.button[aria-disabled="true"] {
+	cursor: not-allowed;
+}
+
+.button[aria-disabled="true"] > * {
+	opacity: 0.6;
+}
+
+.input,
+.select {
+	min-height: var(--rd-control-height);
+	padding: 0 var(--rd-space-2);
+	background: var(--rd-color-canvas-default);
+	border: var(--rd-border-width-thin) solid var(--rd-color-border-control);
+	border-radius: var(--rd-radius-medium);
+}
+
+:focus-visible {
+	outline: var(--rd-border-width-focus) solid var(--rd-color-focus);
+	outline-offset: 2px;
+}
+
+.spinner {
+	animation: rd-spin 1s linear infinite;
+}
+
+@keyframes rd-spin {
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.spinner {
+		animation: none;
+	}
+}
