@@ -26,12 +26,16 @@ export type PullRequestsState =
 			readonly error: FetchFailure;
 	  })
 	| (Common & { readonly status: "Fetching" })
-	| (Common & { readonly status: "Error"; readonly error: FetchFailure });
+	| (Common & { readonly status: "Error"; readonly error: FetchFailure })
+	// The cache stays in storage and is read again by `started` after a new token is saved.
+	| (Common & { readonly status: "Unauthorized" });
 
 export type PullRequestsEvent =
 	| { readonly type: "started"; readonly storedCache: Cache | null }
 	| { readonly type: "queryApplied"; readonly query: SearchQuery }
 	| { readonly type: "refreshRequested" }
+	| { readonly type: "tokenSaved" }
+	| { readonly type: "loggedOut" }
 	| {
 			readonly type: "fetchSucceeded";
 			readonly requestId: number;
@@ -90,6 +94,12 @@ export function pullRequestsReducer(
 				default:
 					return state;
 			}
+		case "tokenSaved":
+			return state.status === "Unauthorized"
+				? { status: "Idle", query, requestId }
+				: state;
+		case "loggedOut":
+			return { status: "Idle", query, requestId };
 		case "fetchSucceeded":
 			if (!isInFlight(state, event.requestId)) {
 				return state;
@@ -105,6 +115,9 @@ export function pullRequestsReducer(
 		case "fetchFailed":
 			if (!isInFlight(state, event.requestId)) {
 				return state;
+			}
+			if (event.error.kind === "Unauthorized") {
+				return { status: "Unauthorized", query, requestId };
 			}
 			return state.status === "Refreshing"
 				? {

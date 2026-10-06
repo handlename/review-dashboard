@@ -90,16 +90,6 @@ describe("pullRequestsReducer", () => {
 		});
 	});
 
-	it("Fetching → Error: fetchFailed with kind Unauthorized (until T4.1)", () => {
-		const unauthorized: FetchFailure = {
-			kind: "Unauthorized",
-			message: "Bad credentials",
-		};
-		expect(run(fetching, failed(fetching, unauthorized))).toMatchObject({
-			status: "Error",
-			error: unauthorized,
-		});
-	});
 
 	it.each([
 		["Idle", idle],
@@ -200,10 +190,6 @@ describe("pullRequestsReducer: cache states", () => {
 		});
 	});
 
-	it("Refreshing → ErrorWithCache: fetchFailed with kind Unauthorized (until T4.1)", () => {
-		const unauthorized: FetchFailure = { kind: "Unauthorized", message: "Bad credentials" };
-		expect(run(refreshing, failed(refreshing, unauthorized))).toMatchObject({ status: "ErrorWithCache" });
-	});
 
 	it("Ready → Refreshing: refreshRequested (manual refresh)", () => {
 		expect(run(ready, refresh)).toEqual({ status: "Refreshing", query: queryA, requestId: 2, cache: cacheOf(queryA) });
@@ -248,5 +234,72 @@ describe("pullRequestsReducer: cache states", () => {
 		expect(showingCache).not.toHaveProperty("issueCount");
 		expect(errorWithCache).not.toHaveProperty("issueCount");
 		expect(run(refreshing, succeeded(refreshing, 1500))).toMatchObject({ issueCount: 1500, truncated: true });
+	});
+});
+
+describe("pullRequestsReducer: unauthorized and logout", () => {
+	const unauthorizedError: FetchFailure = { kind: "Unauthorized", message: "Bad credentials" };
+	const showingCache = run(idle, { type: "started", storedCache: cacheOf(queryA) });
+	const refreshing = run(showingCache, { type: "refreshRequested" });
+	const errorWithCache = run(refreshing, failed(refreshing));
+	const unauthorized = run(fetching, failed(fetching, unauthorizedError));
+
+	it("Fetching → Unauthorized: fetchFailed with kind Unauthorized", () => {
+		expect(unauthorized).toEqual({ status: "Unauthorized", query: queryA, requestId: 1 });
+	});
+
+	it("Refreshing → Unauthorized: fetchFailed with kind Unauthorized", () => {
+		expect(run(refreshing, failed(refreshing, unauthorizedError))).toEqual({
+			status: "Unauthorized",
+			query: queryA,
+			requestId: 1,
+		});
+	});
+
+	it("Unauthorized → Idle: tokenSaved", () => {
+		expect(run(unauthorized, { type: "tokenSaved" })).toEqual({ status: "Idle", query: queryA, requestId: 1 });
+	});
+
+	it("Unauthorized → Idle → ShowingCache: started with the stored cache after tokenSaved", () => {
+		const next = run(unauthorized, { type: "tokenSaved" }, { type: "started", storedCache: cacheOf(queryA) });
+		expect(next).toMatchObject({ status: "ShowingCache", cache: cacheOf(queryA) });
+	});
+
+	it("stale fetchFailed with kind Unauthorized is ignored", () => {
+		const next = run(fetching, { type: "queryApplied", query: queryB }, { type: "started", storedCache: null });
+		expect(run(next, failed(fetching, unauthorizedError))).toBe(next);
+	});
+
+	it.each([
+		["Idle", idle],
+		["ShowingCache", showingCache],
+		["Refreshing", refreshing],
+		["Ready", ready],
+		["ErrorWithCache", errorWithCache],
+		["Fetching", fetching],
+		["Error", error],
+		["Unauthorized", unauthorized],
+	])("loggedOut from %s returns Idle", (_, state) => {
+		expect(run(state, { type: "loggedOut" })).toEqual({ status: "Idle", query: state.query, requestId: state.requestId });
+	});
+
+	it("requestId after loggedOut → started differs from the previous one", () => {
+		const next = run(fetching, { type: "loggedOut" }, { type: "started", storedCache: null });
+		expect(next.status).toBe("Fetching");
+		expect(next.requestId).not.toBe(fetching.requestId);
+	});
+
+	it("queryApplied from Unauthorized returns Idle with the new query", () => {
+		expect(run(unauthorized, { type: "queryApplied", query: queryB })).toEqual({
+			status: "Idle",
+			query: queryB,
+			requestId: unauthorized.requestId,
+		});
+	});
+
+	it("tokenSaved in states other than Unauthorized returns the same state", () => {
+		for (const state of [idle, showingCache, refreshing, ready, errorWithCache, fetching, error]) {
+			expect(run(state, { type: "tokenSaved" })).toBe(state);
+		}
 	});
 });
