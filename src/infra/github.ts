@@ -102,7 +102,7 @@ export async function searchPullRequests(
 	let after: string | null = null;
 	do {
 		const page = await fetchPage(token, query, after, signal);
-		nodes.push(...page.nodes);
+		nodes.push(...(page.nodes ?? []));
 		issueCount = page.issueCount;
 		after = nextCursor(page, nodes.length);
 	} while (after !== null);

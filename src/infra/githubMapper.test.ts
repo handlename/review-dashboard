@@ -47,6 +47,15 @@ describe("toPullRequests", () => {
 		expect(toPullRequests([prNode(), {}])).toHaveLength(1);
 	});
 
+	it("drops duplicate pull requests that appear on two pages", () => {
+		expect(toPullRequests([prNode(), prNode()])).toHaveLength(1);
+	});
+
+	it("maps null latestReviews to no reviews", () => {
+		const [pr] = toPullRequests([prNode({ latestReviews: null })]);
+		expect(pr.latestReviews).toEqual([]);
+	});
+
 	it("drops null nodes", () => {
 		expect(toPullRequests([null, prNode()])).toHaveLength(1);
 	});

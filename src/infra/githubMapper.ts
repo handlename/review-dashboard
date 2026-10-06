@@ -25,7 +25,7 @@ type PullRequestNode = {
 	};
 	readonly latestReviews: {
 		readonly nodes: readonly (ReviewNode | null)[] | null;
-	};
+	} | null;
 };
 
 // Non-PullRequest results (issues) match no fragment and arrive as empty objects.
@@ -34,7 +34,7 @@ export type SearchNode = PullRequestNode | Record<string, never>;
 export type SearchPage = {
 	issueCount: number;
 	pageInfo: { hasNextPage: boolean; endCursor: string | null };
-	nodes: readonly (SearchNode | null)[];
+	nodes: readonly (SearchNode | null)[] | null;
 };
 
 export type FetchErrorKind = "Unauthorized" | "Network" | "RateLimit" | "Other";
@@ -88,7 +88,9 @@ function toReviews(
 export function toPullRequests(
 	nodes: readonly (SearchNode | null)[],
 ): readonly PullRequest[] {
-	return nodes.filter(isPullRequestNode).map((node) => ({
+	// The same pull request can appear on two pages when results shift during pagination.
+	const unique = new Map(nodes.filter(isPullRequestNode).map((node) => [node.url, node]));
+	return [...unique.values()].map((node) => ({
 		number: node.number,
 		title: node.title,
 		url: node.url,
@@ -102,7 +104,7 @@ export function toPullRequests(
 		},
 		createdAt: node.createdAt,
 		updatedAt: node.updatedAt,
-		latestReviews: toReviews(node.latestReviews.nodes),
+		latestReviews: toReviews(node.latestReviews?.nodes ?? null),
 	}));
 }
 
