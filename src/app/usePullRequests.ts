@@ -6,13 +6,16 @@ import { DEFAULT_QUERY } from "../domain/searchQuery";
 import { sortPullRequests } from "../domain/sort";
 import type { ViewSettings } from "../domain/viewSettings";
 import { FetchError, searchPullRequests } from "../infra/github";
-import { loadQuery, saveQuery } from "../infra/storage";
+import { loadCache, loadQuery, saveCache, saveQuery } from "../infra/storage";
 import type { PullRequestsState } from "./pullRequestsReducer";
 import { initialPullRequestsState, pullRequestsReducer } from "./pullRequestsReducer";
 
 function listOf(state: PullRequestsState): readonly PullRequest[] | null {
 	switch (state.status) {
+		case "ShowingCache":
+		case "Refreshing":
 		case "Ready":
+		case "ErrorWithCache":
 			return state.cache.pullRequests;
 		default:
 			return null;
@@ -27,13 +30,20 @@ export function usePullRequests(token: string | null, viewSettings: ViewSettings
 	// Leave Idle before paint, so Idle is never rendered.
 	useLayoutEffect(() => {
 		if (state.status === "Idle" && token !== null) {
-			dispatch({ type: "started", storedCache: null });
+			dispatch({ type: "started", storedCache: loadCache() });
 		}
 	}, [state.status, token]);
 
+	// Background refresh right after showing the cache (FR-CACHE-3).
+	useEffect(() => {
+		if (state.status === "ShowingCache") {
+			dispatch({ type: "refreshRequested" });
+		}
+	}, [state.status]);
+
 	// Keyed by the in-flight request and the token: leaving the in-flight state for any reason
 	// (query applied, logout, new request) runs the cleanup and aborts the old request.
-	const inFlightId = state.status === "Fetching" ? state.requestId : null;
+	const inFlightId = state.status === "Fetching" || state.status === "Refreshing" ? state.requestId : null;
 	const { query } = state;
 	useEffect(() => {
 		if (inFlightId === null || token === null) {
@@ -42,6 +52,7 @@ export function usePullRequests(token: string | null, viewSettings: ViewSettings
 		const controller = new AbortController();
 		searchPullRequests(token, query, controller.signal).then(
 			({ pullRequests, issueCount }) => {
+				// An aborted request (e.g. logout) must not write back the cache it just cleared.
 				if (controller.signal.aborted) {
 					return;
 				}
@@ -50,6 +61,7 @@ export function usePullRequests(token: string | null, viewSettings: ViewSettings
 					fetchedAt: new Date().toISOString(),
 					pullRequests,
 				};
+				saveCache(cache);
 				dispatch({
 					type: "fetchSucceeded",
 					requestId: inFlightId,
@@ -83,6 +95,8 @@ export function usePullRequests(token: string | null, viewSettings: ViewSettings
 		dispatch({ type: "queryApplied", query: next });
 	}, []);
 
+	const refresh = useCallback(() => dispatch({ type: "refreshRequested" }), []);
+
 	const pullRequests = listOf(state);
 	const { grouping, sortKey, sortDirection } = viewSettings;
 	const groups = useMemo(
@@ -93,5 +107,5 @@ export function usePullRequests(token: string | null, viewSettings: ViewSettings
 		[pullRequests, grouping, sortKey, sortDirection],
 	);
 
-	return { state, pullRequests, groups, applyQuery };
+	return { state, pullRequests, groups, applyQuery, refresh };
 }

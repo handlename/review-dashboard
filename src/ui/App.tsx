@@ -4,6 +4,7 @@ import { usePullRequests } from "../app/usePullRequests";
 import { useSettings } from "../app/useSettings";
 import type { PullRequestGroup } from "../domain/group";
 import type { Grouping, SortKey, ViewSettings } from "../domain/viewSettings";
+import { formatNumber } from "./format";
 import { GroupSection } from "./GroupSection";
 import { PullRequestTable } from "./PullRequestTable";
 import { QueryBar } from "./QueryBar";
@@ -66,19 +67,28 @@ function PullRequestList(props: {
 			if (groups.every((group) => group.pullRequests.length === 0)) {
 				return <p>No pull requests match this query.</p>;
 			}
+			const truncated = state.status === "Ready" && state.truncated && (
+				<p>
+					Showing {formatNumber(groups.reduce((n, group) => n + group.pullRequests.length, 0))} of{" "}
+					{formatNumber(state.issueCount)} results (search limit: 1,000)
+				</p>
+			);
 			if (viewSettings.grouping === "none") {
 				return (
-					<PullRequestTable pullRequests={groups[0].pullRequests} {...sort} />
+					<>
+						{truncated}
+						<PullRequestTable pullRequests={groups[0].pullRequests} {...sort} />
+					</>
 				);
 			}
-			return groups.map((group) => (
-				<GroupSection
-					key={group.name}
-					name={group.name}
-					pullRequests={group.pullRequests}
-					{...sort}
-				/>
-			));
+			return (
+				<>
+					{truncated}
+					{groups.map((group) => (
+						<GroupSection key={group.name} name={group.name} pullRequests={group.pullRequests} {...sort} />
+					))}
+				</>
+			);
 		}
 	}
 }
@@ -86,7 +96,7 @@ function PullRequestList(props: {
 export function App() {
 	const { token, saveToken, viewSettings, setGrouping, toggleSort } =
 		useSettings();
-	const { state, groups, applyQuery } = usePullRequests(token, viewSettings);
+	const { state, groups, applyQuery, refresh } = usePullRequests(token, viewSettings);
 
 	return (
 		<>
@@ -105,7 +115,7 @@ export function App() {
 				) : (
 					<>
 						<QueryBar query={state.query} onApply={applyQuery} />
-						<StatusBar state={state} />
+						<StatusBar state={state} onRefresh={refresh} />
 						<PullRequestList
 							state={state}
 							groups={groups}
