@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createSearchQuery } from "../domain/searchQuery";
 import type { Cache } from "../domain/cache";
-import { loadCache, loadQuery, loadToken, loadViewSettings, saveCache, saveQuery, saveToken, saveViewSettings } from "./storage";
+import { clearSession, loadCache, loadQuery, loadToken, loadViewSettings, saveCache, saveQuery, saveToken, saveViewSettings } from "./storage";
 
 function fakeStorage(): Storage {
 	const map = new Map<string, string>();
@@ -164,5 +164,28 @@ describe("storage: cache", () => {
 	it("saveCache does not throw when setItem throws (quota exceeded)", () => {
 		vi.stubGlobal("localStorage", throwingStorage());
 		expect(() => saveCache(cache)).not.toThrow();
+	});
+});
+
+describe("storage: clearSession", () => {
+	it("clearSession removes token and cache", () => {
+		saveToken("ghp_example");
+		localStorage.setItem("review-dashboard:v1:cache", "{}");
+		clearSession();
+		expect(localStorage.getItem("review-dashboard:v1:token")).toBeNull();
+		expect(localStorage.getItem("review-dashboard:v1:cache")).toBeNull();
+	});
+
+	it("clearSession keeps query and view settings", () => {
+		saveQuery(createSearchQuery("is:pr"));
+		saveViewSettings({ grouping: "owner", sortKey: "title", sortDirection: "asc" });
+		clearSession();
+		expect(loadQuery()).toBe("is:pr");
+		expect(loadViewSettings()).toEqual({ grouping: "owner", sortKey: "title", sortDirection: "asc" });
+	});
+
+	it("clearSession does not throw when localStorage access throws", () => {
+		vi.stubGlobal("localStorage", throwingStorage());
+		expect(() => clearSession()).not.toThrow();
 	});
 });

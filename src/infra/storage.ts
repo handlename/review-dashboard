@@ -30,6 +30,14 @@ function write(key: string, value: string): void {
 	}
 }
 
+function remove(key: string): void {
+	try {
+		localStorage.removeItem(key);
+	} catch {
+		// Ignored: see read().
+	}
+}
+
 function readJson(key: string): unknown {
 	const value = read(key);
 	if (value === null) {
@@ -147,4 +155,10 @@ export function loadCache(): Cache | null {
 
 export function saveCache(cache: Cache): void {
 	write(KEYS.cache, JSON.stringify(cache));
+}
+
+// The search query and view settings are kept across logouts.
+export function clearSession(): void {
+	remove(KEYS.token);
+	remove(KEYS.cache);
 }
