@@ -65,6 +65,12 @@ describe("storage: view settings", () => {
 		expect(loadViewSettings()).toEqual(settings);
 	});
 
+	it("loadViewSettings accepts the owner sort key", () => {
+		const settings = { grouping: "none", sortKey: "owner", sortDirection: "desc" } as const;
+		saveViewSettings(settings);
+		expect(loadViewSettings()).toEqual(settings);
+	});
+
 	it("loadViewSettings returns null for invalid JSON", () => {
 		localStorage.setItem("review-dashboard:v1:view", "{not json");
 		expect(loadViewSettings()).toBeNull();

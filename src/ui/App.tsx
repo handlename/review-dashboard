@@ -66,6 +66,7 @@ function PullRequestList(props: {
 				sortKey: viewSettings.sortKey,
 				sortDirection: viewSettings.sortDirection,
 				onSort,
+				grouping: viewSettings.grouping,
 			};
 			if (groups.every((group) => group.pullRequests.length === 0)) {
 				return <p className="muted list-message">No pull requests match this query.</p>;

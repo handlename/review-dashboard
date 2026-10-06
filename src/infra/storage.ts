@@ -108,7 +108,7 @@ export function loadViewSettings(): ViewSettings | null {
 	if (
 		!isObject(value) ||
 		!isOneOf(value.grouping, ["none", "owner", "repository"]) ||
-		!isOneOf(value.sortKey, ["number", "title", "repository", "author", "diff", "createdAt", "updatedAt"]) ||
+		!isOneOf(value.sortKey, ["number", "title", "owner", "repository", "author", "diff", "createdAt", "updatedAt"]) ||
 		!isOneOf(value.sortDirection, ["asc", "desc"])
 	) {
 		return null;

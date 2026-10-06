@@ -38,10 +38,18 @@ describe("sortPullRequests", () => {
 		expect(numbers(sortPullRequests(prs, "title", "asc"))).toEqual([3, 2, 1]);
 	});
 
-	it("sorts by repository", () => {
+	it("sorts by owner", () => {
 		const prs = [
-			pr(1, { repository: "acme/web" }),
-			pr(2, { repository: "acme/api" }),
+			pr(1, { owner: "zeta", repository: "zeta/api" }),
+			pr(2, { owner: "acme", repository: "acme/web" }),
+		];
+		expect(numbers(sortPullRequests(prs, "owner", "asc"))).toEqual([2, 1]);
+	});
+
+	it("sorts by repository name without the owner", () => {
+		const prs = [
+			pr(1, { owner: "acme", repository: "acme/web" }),
+			pr(2, { owner: "zeta", repository: "zeta/api" }),
 		];
 		expect(numbers(sortPullRequests(prs, "repository", "asc"))).toEqual([2, 1]);
 	});

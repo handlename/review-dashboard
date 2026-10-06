@@ -48,7 +48,7 @@
 
 	--rd-layout-max-width: 1280px;
 	--rd-layout-gutter: 24px;
-	--rd-table-min-width: 976px;
+	--rd-table-min-width: 1024px;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -247,8 +247,11 @@ button {
 .col-title {
 	min-width: 160px;
 }
+.col-owner {
+	width: 96px;
+}
 .col-repository {
-	width: 144px;
+	width: 112px;
 }
 .col-author {
 	width: 88px;
@@ -261,7 +264,7 @@ button {
 }
 .col-created,
 .col-updated {
-	width: 128px;
+	width: 120px;
 }
 
 .pr-table th.col-number .sort-button,

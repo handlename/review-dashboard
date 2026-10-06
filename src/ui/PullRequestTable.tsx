@@ -1,5 +1,5 @@
 import type { PullRequest } from "../domain/pullRequest";
-import type { SortDirection, SortKey } from "../domain/viewSettings";
+import type { Grouping, SortDirection, SortKey } from "../domain/viewSettings";
 import { formatDateTime, formatFileCount, formatNumber } from "./format";
 import { ExternalLinkIcon, SortIcon } from "./icons";
 import { Avatar, ReviewBadges, loginOf } from "./ReviewBadges";
@@ -21,22 +21,10 @@ function Title(props: { pr: PullRequest }) {
 	);
 }
 
-// Allows the repository name to wrap after the owner.
-function Repository(props: { name: string }) {
-	const [owner, ...rest] = props.name.split("/");
-	return rest.length === 0 ? (
-		<>{props.name}</>
-	) : (
-		<>
-			{owner}/<wbr />
-			{rest.join("/")}
-		</>
-	);
-}
-
 const COLUMNS: readonly { readonly key: SortKey | null; readonly label: string; readonly className: string }[] = [
 	{ key: "number", label: "#", className: "col-number" },
 	{ key: "title", label: "Title", className: "col-title" },
+	{ key: "owner", label: "Owner", className: "col-owner" },
 	{ key: "repository", label: "Repository", className: "col-repository" },
 	{ key: "author", label: "Author", className: "col-author" },
 	{ key: null, label: "Reviews", className: "col-reviews" },
@@ -45,18 +33,28 @@ const COLUMNS: readonly { readonly key: SortKey | null; readonly label: string; 
 	{ key: "updatedAt", label: "Updated", className: "col-updated" },
 ];
 
+// Columns that repeat the group heading are hidden.
+const HIDDEN_KEYS: Record<Grouping, readonly SortKey[]> = {
+	none: [],
+	owner: ["owner"],
+	repository: ["owner", "repository"],
+};
+
 export function PullRequestTable(props: {
 	pullRequests: readonly PullRequest[];
+	grouping: Grouping;
 	sortKey: SortKey;
 	sortDirection: SortDirection;
 	onSort(key: SortKey): void;
 }) {
+	const hidden = HIDDEN_KEYS[props.grouping];
+	const shows = (key: SortKey) => !hidden.includes(key);
 	return (
 		<div className="table-wrapper">
 		<table className="pr-table">
 			<thead>
 				<tr>
-					{COLUMNS.map(({ key, label, className }) => (
+					{COLUMNS.filter(({ key }) => key === null || shows(key)).map(({ key, label, className }) => (
 						<th
 							key={label}
 							className={className}
@@ -84,9 +82,8 @@ export function PullRequestTable(props: {
 						<td>
 							<Title pr={pr} />
 						</td>
-						<td>
-							<Repository name={pr.repository} />
-						</td>
+						{shows("owner") && <td>{pr.owner}</td>}
+						{shows("repository") && <td>{pr.repository.slice(pr.owner.length + 1)}</td>}
 						<td>
 							<div className="author">
 								<Avatar actor={pr.author} />

@@ -1,10 +1,11 @@
 import type { PullRequest } from "../domain/pullRequest";
-import type { SortDirection, SortKey } from "../domain/viewSettings";
+import type { Grouping, SortDirection, SortKey } from "../domain/viewSettings";
 import { PullRequestTable } from "./PullRequestTable";
 
 export function GroupSection(props: {
 	name: string;
 	pullRequests: readonly PullRequest[];
+	grouping: Grouping;
 	sortKey: SortKey;
 	sortDirection: SortDirection;
 	onSort(key: SortKey): void;

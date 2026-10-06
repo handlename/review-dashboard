@@ -2,6 +2,7 @@ export type Grouping = "none" | "owner" | "repository";
 export type SortKey =
 	| "number"
 	| "title"
+	| "owner"
 	| "repository"
 	| "author"
 	| "diff"
