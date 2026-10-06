@@ -33,7 +33,13 @@ It is triggered by saving a PAT, applying a search query, a background refresh, 
 ### Background refresh
 
 Fetching in the background while the cache stays on screen, then replacing the list when the fetch completes.
-It runs automatically once on access and never periodically. (FR-CACHE-3)
+It runs automatically once on access, and again at every auto refresh. (FR-CACHE-3)
+
+### Auto refresh
+
+A background refresh that runs again after the interval the user chose in the settings dialog (Off, 1, 5, 10, or 30 minutes) has passed since the last fetch finished.
+It stops after a rate limit error or an invalid PAT, and resumes after the next successful fetch.
+While one is scheduled, a bar along the bottom of the refresh button shows how long remains. (FR-CACHE-7, FR-CACHE-8, FR-CACHE-9)
 
 ### Manual refresh
 
@@ -44,7 +50,12 @@ A fetch the user starts by pressing the refresh button. (FR-CACHE-4)
 ### PR (PullRequest)
 
 A single pull request shown in the list.
-It has a PR number, title, URL, repository, author, diff stat, created date, updated date, and a list of latest reviews. (FR-LIST-1)
+It has a PR number, title, draft flag, URL, repository, author, diff stat, created date, updated date, and a list of latest reviews. (FR-LIST-1)
+
+### Draft (isDraft)
+
+A PR marked as a draft on GitHub.
+The default query excludes drafts; when the search query includes them, their rows are shown muted. (FR-LIST-12)
 
 ### Actor (Actor)
 
@@ -122,9 +133,18 @@ One of PR number, title, organization, repository, author, diff stat, created da
 The direction of ordering by the sort key.
 Either `asc` (ascending) or `desc` (descending); the initial value is `desc`. (FR-LIST-6, FR-LIST-7)
 
+### Relative time
+
+A created or updated date shown relative to now, such as "5 minutes ago", instead of as an absolute date and time.
+Turned on in the settings dialog. (FR-LIST-13)
+
 ## UI
 
 Terms from [UI_DESIGN.md](UI_DESIGN.md).
+
+### Settings dialog
+
+The dialog opened from the Settings button in the header. It holds the relative time switch, the auto refresh interval, and log out. (FR-SET-1)
 
 ### Design token
 
@@ -164,10 +184,11 @@ It is shown on screen to indicate how fresh the list is. (FR-CACHE-5)
 
 ### View settings (ViewSettings)
 
-The combination of grouping, sort key, and sort direction.
-Stored in localStorage and kept across reloads.
+The combination of grouping, sort key, sort direction, whether relative times are shown, and the auto refresh interval.
+Stored in localStorage and kept across reloads and logouts.
 
 ### Log out
 
 Removing the PAT and the caches from localStorage and returning to the PAT input screen.
+Started from the settings dialog, or from the PAT input screen in the Unauthorized state.
 The view settings are not removed, and the search query stays in the page URL. (FR-AUTH-2)

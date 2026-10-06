@@ -51,7 +51,7 @@ src/
   domain/
     pullRequest.ts   # Types: PullRequest, Review, ReviewState, DiffStat
     searchQuery.ts   # SearchQuery construction and validation, DEFAULT_QUERY
-    viewSettings.ts  # Grouping, SortKey, SortDirection, ViewSettings and defaults
+    viewSettings.ts  # Grouping, SortKey, SortDirection, AutoRefreshMinutes, ViewSettings and defaults
     sort.ts          # sortPullRequests(prs, sortKey, direction)
     group.ts         # groupPullRequests(prs, grouping)
     cache.ts         # Cache type, cacheFor(cache, query), withCache(caches, cache, limit)
@@ -63,11 +63,15 @@ src/
   app/
     usePullRequests.ts  # State for cache display, fetching, and errors
     useSettings.ts      # Reads and writes the PAT and view settings
+    autoRefresh.ts      # shouldAutoRefresh(state), scheduleAutoRefresh(state, minutes, refresh)
+    useAutoRefresh.ts   # Schedules automatic refreshes and exposes the timer for the progress bar
+    useNow.ts           # Current time, updated every minute, for relative times
   ui/
     App.tsx
     TokenForm.tsx       # PAT input screen
     QueryBar.tsx        # Edit, apply, and reset the search query
-    StatusBar.tsx       # Last fetched time, in-progress indicator, errors, manual refresh, log out
+    StatusBar.tsx       # Last fetched time, in-progress indicator, errors, manual refresh, auto refresh bar
+    SettingsDialog.tsx  # Relative times, auto refresh interval, log out
     PullRequestTable.tsx
     GroupSection.tsx
     ReviewBadges.tsx
@@ -93,6 +97,7 @@ type Review = {
 type PullRequest = {
   readonly number: number;
   readonly title: string;
+  readonly isDraft: boolean;
   readonly url: string;
   readonly repository: string;   // nameWithOwner
   readonly owner: string;
@@ -106,6 +111,15 @@ type PullRequest = {
 type Grouping = "none" | "owner" | "repository";
 type SortKey = "number" | "title" | "owner" | "repository" | "author" | "diff" | "createdAt" | "updatedAt";
 type SortDirection = "asc" | "desc";
+type AutoRefreshMinutes = 0 | 1 | 5 | 10 | 30; // 0 = off
+
+type ViewSettings = {
+  readonly grouping: Grouping;
+  readonly sortKey: SortKey;
+  readonly sortDirection: SortDirection;
+  readonly relativeTime: boolean;
+  readonly autoRefreshMinutes: AutoRefreshMinutes;
+};
 
 type Cache = {
   readonly query: SearchQuery;
@@ -136,6 +150,7 @@ query SearchPullRequests($query: String!, $after: String) {
       ... on PullRequest {
         number
         title
+        isDraft
         url
         author { login avatarUrl(size: 40) }
         additions
@@ -198,6 +213,14 @@ stateDiagram-v2
 - In Unauthorized, the PAT input screen is shown instead of the list (FR-AUTH-3). The PAT and the cache are kept until a new PAT is saved or the user logs out. Saving a new PAT returns to Idle, so an existing cache is shown again while it is refreshed
 - Logging out from any state removes the PAT and the cache and shows the PAT input screen (FR-AUTH-2)
 
+### Auto refresh
+
+`useAutoRefresh` dispatches the same event as a manual refresh when the interval passes; the state transitions above are unchanged. (FR-CACHE-7, FR-CACHE-8)
+
+- It schedules a refresh in Ready, and in ErrorWithCache and Error when the error is a network error or another error. It schedules nothing in other states, so an automatic refresh never overlaps a running fetch, and it stops after a rate limit error or Unauthorized until the next successful fetch
+- The interval counts from when the state was entered (or the interval was changed), not from the cache's `fetchedAt`. ErrorWithCache keeps the cache of the last successful fetch, so counting from `fetchedAt` would retry immediately after every failure
+- The timer restarts whenever `status`, `requestId`, or the interval changes. `requestId` changes on every request, so every finished fetch restarts the timer
+
 ## Persistence
 
 localStorage keys are prefixed with `review-dashboard:v1:`.
@@ -206,12 +229,14 @@ When the storage format changes, bump the version and stop reading the old keys.
 | Key | Contents | Removed when |
 |-----|----------|--------------|
 | `review-dashboard:v1:token` | PAT | Log out |
-| `review-dashboard:v1:view` | View settings (JSON) | Never |
+| `review-dashboard:v1:view` | View settings (JSON), including the time display and auto refresh interval | Never |
 | `review-dashboard:v1:cache` | Caches (JSON array, newest first) | Log out; the oldest is dropped when a sixth search query is fetched |
 
 - The caches hold results for the five most recently fetched search queries, one per search query. If saving all of them exceeds the quota, only as many of the newest as fit are saved
 - The search query is not stored in localStorage. It lives in the page URL as the `q` parameter (omitted for the default query), so pages with different search queries can be open at the same time. Applying a search query adds a history entry, and browser back and forward apply the search query of that entry
 - On read, parse the JSON and validate its shape; treat invalid values as absent
+- View settings saved before `relativeTime` and `autoRefreshMinutes` existed are still read: those two fields fall back to their defaults when missing or invalid, while grouping and sort keep their values
+- Caches saved before `isDraft` existed fail validation and are discarded
 - If localStorage is unavailable or a write fails because the quota is exceeded, the page keeps working (it just cannot save)
 
 ## Security
@@ -247,6 +272,7 @@ Because the PAT is stored in localStorage, preventing XSS is the top priority. (
 |----------|--------|-----------------------|
 | Authenticate only with a user-entered PAT | GitHub's OAuth token exchange endpoint does not support CORS, so OAuth cannot be completed with static hosting alone | OAuth + external proxy (more infrastructure to run) |
 | Use the GraphQL API | Diff stats and reviews come back in a single request | REST API (extra requests per PR) |
-| Stale-while-revalidate cache | Gives both instant display and fresh data | TTL-based cache, periodic polling |
+| Stale-while-revalidate cache | Gives both instant display and fresh data | TTL-based cache |
+| Opt-in auto refresh, off by default | Keeps the list fresh for users who leave the page open, without spending the search API rate limit for everyone else | Always-on polling |
 | Store everything in localStorage | The data is small and a synchronous API keeps it simple | IndexedDB, sessionStorage (would force re-entering the PAT every session) |
 | No data-fetching library | Fetch triggers are few and a custom hook is enough; fewer dependencies shrink the XSS attack surface | TanStack Query, etc. |

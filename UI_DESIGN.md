@@ -39,7 +39,7 @@ They are declared on `:root` in a single stylesheet bundled at build time.
 | `--rd-color-fg-on-emphasis` | #ffffff | #ffffff | Text and glyphs on emphasis fills (primary button, review state icons) |
 | `--rd-color-canvas-default` | #ffffff | #0d1117 | Page background, input background, ring around review state icons |
 | `--rd-color-canvas-subtle` | #f6f8fa | #151b23 | Table header background, secondary button background |
-| `--rd-color-canvas-inset` | #eff2f5 | #010409 | Avatar placeholder before the image loads |
+| `--rd-color-canvas-inset` | #eff2f5 | #010409 | Avatar placeholder before the image loads, draft row background |
 | `--rd-color-row-hover` | #f0f3f6 | #1c222b | Table row background on hover |
 | `--rd-color-border-default` | #d1d9e0 | #3d444d | Decorative rules: table row separators, section dividers |
 | `--rd-color-border-control` | #818b98 | #656c76 | Boundaries of inputs, selects, and secondary buttons |
@@ -51,6 +51,7 @@ They are declared on `:root` in a single stylesheet bundled at build time.
 | `--rd-color-danger-emphasis` | #cf222e | #da3633 | CHANGES_REQUESTED icon fill |
 | `--rd-color-neutral-emphasis` | #59636e | #656c76 | COMMENTED and DISMISSED icon fill |
 | `--rd-color-focus` | #0969da | #1f6feb | Focus ring |
+| `--rd-color-backdrop` | #1f232880 | #010409cc | Backdrop behind the settings dialog (translucent; no contrast requirement) |
 
 ### Contrast
 
@@ -67,6 +68,7 @@ Decorative rules are not required to meet a threshold.
 | `--rd-color-fg-muted` | `--rd-color-canvas-default` | 6.11 | 6.49 | 4.5 |
 | `--rd-color-fg-muted` | `--rd-color-canvas-subtle` | 5.74 | 5.94 | 4.5 |
 | `--rd-color-fg-muted` | `--rd-color-row-hover` | 5.48 | 5.49 | 4.5 |
+| `--rd-color-fg-muted` | `--rd-color-canvas-inset` | 5.44 | 7.05 | 4.5 |
 | `--rd-color-accent-fg` | `--rd-color-canvas-default` | 5.19 | 6.10 | 4.5 |
 | `--rd-color-accent-fg` | `--rd-color-canvas-subtle` | 4.87 | 5.58 | 4.5 |
 | `--rd-color-accent-fg` | `--rd-color-row-hover` | 4.66 | 5.15 | 4.5 |
@@ -158,7 +160,7 @@ Buttons:
 | Variant | Background | Text | Border | Used for |
 |---|---|---|---|---|
 | Primary | `--rd-color-accent-emphasis` | `--rd-color-fg-on-emphasis` | none | Save, Apply |
-| Secondary | `--rd-color-canvas-subtle` | `--rd-color-fg-default` | `--rd-border-width-thin` `--rd-color-border-control` | Reset, Refresh, Log out |
+| Secondary | `--rd-color-canvas-subtle` | `--rd-color-fg-default` | `--rd-border-width-thin` `--rd-color-border-control` | Reset, Refresh, Log out, Settings |
 
 - Buttons have `min-height: var(--rd-control-height)`, horizontal padding `--rd-space-3`, `--rd-radius-medium`, and semibold `--rd-font-size-200` text
 - A button with `aria-disabled="true"` keeps its colors and gets `cursor: not-allowed` and 60% opacity on its label only; it stays focusable
@@ -175,12 +177,13 @@ Buttons:
 | Sort ascending | Upward triangle | Active sort column header |
 | Sort descending | Downward triangle | Active sort column header |
 | Refresh | Circular arrow | Refresh button |
+| Settings | Gear: a ring with eight square teeth and a hole in the center, drawn with strokes | Settings button |
 | Spinner | Three-quarter circle arc that rotates once per second | StatusBar while fetching |
 | External link | Square with an arrow leaving its top-right corner; 12px | After the PR title |
 | Warning | Circle with an exclamation mark | Before error messages |
 | Ghost | Head-and-shoulders silhouette inside a circle; drawn at avatar size | Missing or failed avatars |
 
-- When `prefers-reduced-motion: reduce` is set, the spinner does not rotate
+- When `prefers-reduced-motion: reduce` is set, the spinner does not rotate and the auto refresh bar grows in ten steps instead of continuously
 
 ### Layout
 
@@ -234,12 +237,13 @@ Shown when a PAT is saved and the state is not Unauthorized.
 
 ```text
 +----------------------------------------------------------------------------------------------+
-| review-dashboard                                                  Group by [ Repository v ]  |  App header, min-height 56px
+| review-dashboard                                         Group by [ Repository v ]  [ (*) ]  |  App header, min-height 56px; (*) = Settings
 +----------------------------------------------------------------------------------------------+
 | Search query                                                                                 |  QueryBar, padding space-4 gutter
 | [ is:pr review-requested:@me state:open archived:false         ] [ Apply ] [ Reset ]         |  gap space-2
 +----------------------------------------------------------------------------------------------+
-| Last fetched 2026-09-28 14:05   (spinner) Refreshing...        [ Refresh ] [ Log out ]       |  StatusBar, min-height 40px, fg-muted
+| Last fetched 2026-09-28 14:05   (spinner) Refreshing...                    [ Refresh ]       |  StatusBar, min-height 40px, fg-muted
+|                                                                            ▔▔▔▔▔▔           |  auto refresh bar along the bottom edge of Refresh
 | (!) Could not reach GitHub. Check your connection and press Refresh.                         |  error line, danger-fg
 +----------------------------------------------------------------------------------------------+
 | handlename/review-dashboard (2)                                                              |  GroupSection h2, space-5 above
@@ -265,8 +269,9 @@ Every component below is in `ui/` as listed in [ARCHITECTURE.md](ARCHITECTURE.md
 
 Elements:
 
-- Header: `<header>` containing `<h1 tabindex="-1">review-dashboard</h1>` and, on the Dashboard only, the grouping select
+- Header: `<header>` containing `<h1 tabindex="-1">review-dashboard</h1>` and, on the Dashboard only, the grouping select and the Settings button, grouped at the right end with `--rd-space-3` between them
 - Grouping select: visible `<label>` "Group by" and a `<select>` with options None, Organization, Repository (FR-LIST-5)
+- Settings button: secondary button containing only the settings icon, with `aria-label="Settings"` and `aria-haspopup="dialog"`. It opens the [SettingsDialog](#settingsdialog)
 - Two live regions that are always in the DOM, visually hidden: one with `role="status"` and one with `role="alert"`. Only their text changes (4.1.3)
 - Screen switch: the PAT input screen when no PAT is saved or the state is Unauthorized; otherwise the Dashboard
 
@@ -334,14 +339,16 @@ Elements, as listed in [ARCHITECTURE.md](ARCHITECTURE.md#directory-layout):
 - Last fetched time: "Last fetched " followed by a `<time>` element (FR-CACHE-5)
 - In-progress indicator: spinner icon and text (FR-CACHE-5)
 - Error line: warning icon and message in `--rd-color-danger-fg` (FR-ERR-1)
-- Refresh (secondary, with the refresh icon) and Log out (secondary), aligned to the right end (FR-CACHE-4, FR-AUTH-2)
+- Refresh (secondary, with the refresh icon), aligned to the right end (FR-CACHE-4)
+- Auto refresh bar: a 2px bar along the bottom edge of Refresh, in `--rd-color-accent-emphasis` (`CanvasText` in forced colors mode), shown only while an automatic refresh is scheduled (FR-CACHE-9). It is decorative (`aria-hidden="true"`); Refresh is described by visually hidden text "Auto refresh every <n> minute(s)" through `aria-describedby`
 
 Behavior:
 
 - While fetching, Refresh has `aria-disabled="true"` and pressing it does nothing
-- Log out removes the PAT and the cache and shows the PAT input screen
+- The auto refresh bar grows from the left edge to the right edge over the auto refresh interval, starting when the last fetch finished or when the interval was changed. It is not shown when auto refresh is Off, while fetching, or after a rate limit error or an invalid PAT, because no automatic refresh is scheduled then (FR-CACHE-8)
+- Each automatic refresh writes "Refreshing pull requests" and then "Updated. <n> pull requests" to the status live region, the same as a manual refresh
 
-Used tokens: `--rd-font-size-200`, `--rd-color-fg-muted`, `--rd-color-danger-fg`, `--rd-space-2`, `--rd-space-3`.
+Used tokens: `--rd-font-size-200`, `--rd-color-fg-muted`, `--rd-color-danger-fg`, `--rd-color-accent-emphasis`, `--rd-space-2`, `--rd-space-3`.
 States: [StatusBar column](#state-matrix).
 
 ### PullRequestTable
@@ -358,8 +365,8 @@ The initial sort is Updated, descending.
 | Author | See [Author cell](#author-cell) | Left | 88px | Yes (by login) | FR-LIST-1, FR-LIST-8 |
 | Reviews | See [ReviewBadges](#reviewbadges) | Left | 152px | No | FR-LIST-3 |
 | Diff | `+adds` and `-dels` on line 1, `n files` on line 2, `--rd-font-size-100` | Right | 120px | Yes (adds + dels) | FR-LIST-1, FR-LIST-2, FR-LIST-8 |
-| Created | Date and time, `--rd-font-size-100` | Right | 120px | Yes | FR-LIST-1, FR-LIST-8 |
-| Updated | Date and time, `--rd-font-size-100` | Right | 120px | Yes | FR-LIST-1, FR-LIST-8 |
+| Created | Date and time, or relative time; `--rd-font-size-100` | Right | 120px | Yes | FR-LIST-1, FR-LIST-8, FR-LIST-13 |
+| Updated | Date and time, or relative time; `--rd-font-size-100` | Right | 120px | Yes | FR-LIST-1, FR-LIST-8, FR-LIST-13 |
 
 The table header text for the Number column is `#`.
 
@@ -375,6 +382,8 @@ Elements:
 - The link is rendered only when the URL starts with `https://github.com/` ([ARCHITECTURE.md](ARCHITECTURE.md#security)); otherwise the title is plain text
 - Diff: `+120` in `--rd-color-success-fg`, `-30` in `--rd-color-danger-fg`, and `4 files` in `--rd-color-fg-muted`. The sort key is additions + deletions ([GLOSSARY.md](GLOSSARY.md#diff-stat-diffstat)); the file count does not affect order
 - Columns that repeat the group heading are hidden (FR-LIST-11): Owner when grouping by organization; Owner and Repository when grouping by repository. The Title column takes the freed width
+- Draft rows (FR-LIST-12): the row has the `pr-draft` class and a `--rd-color-canvas-inset` background (`--rd-color-row-hover` on hover, as for other rows), and its text, title link, and diff numbers are all in `--rd-color-fg-muted`. The title link is always underlined, because its color no longer sets it apart. The title is followed by visually hidden text "(draft)", so the difference is not conveyed by color alone (1.4.1). Avatars and review badges keep their colors
+- Created and Updated are `<time datetime>` elements with the ISO 8601 time. With relative times on (FR-LIST-13), they show the time relative to now in English, such as "5 minutes ago", "yesterday", or "last month", and the absolute date and time in `title`. Times less than a minute old, including times slightly in the future, show "now". The relative times are recomputed every minute. Sorting uses the timestamps, not the displayed text
 
 Target size: every button in this table and in the header, QueryBar, StatusBar, and PAT input screen is at least 24px by 24px (2.5.8); `--rd-control-height` makes buttons 32px tall, and header sort buttons fill a cell at least 32px tall.
 
@@ -404,6 +413,25 @@ Behavior:
 
 Used tokens: `--rd-font-size-300`, `--rd-font-weight-semibold`, `--rd-color-fg-muted`, `--rd-space-5`.
 States: [PR list column](#state-matrix).
+
+### SettingsDialog
+
+Elements:
+
+- A native `<dialog>` opened as a modal with `showModal()`, labelled by its `<h2>` "Settings" through `aria-labelledby`
+- "Show relative times" checkbox with a `<label for>` (FR-LIST-13)
+- "Auto refresh" visible `<label>` and a `<select>` with options Off, 1 minute, 5 minutes, 10 minutes, 30 minutes (FR-CACHE-7)
+- Below a `--rd-color-border-default` rule: Log out (secondary) at the left end and Close (primary) at the right end (FR-AUTH-2)
+- `::backdrop` in `--rd-color-backdrop`
+
+Behavior:
+
+- Changes take effect and are saved immediately; there is no Save button (FR-SET-1)
+- Esc and Close close the dialog. The browser keeps focus inside the dialog while it is open and returns focus to the Settings button when it closes
+- Log out closes the dialog, removes the PAT and the cache (FR-AUTH-2), and shows the PAT input screen
+- The settings are kept across reloads and logouts ([ARCHITECTURE.md](ARCHITECTURE.md#persistence))
+
+Used tokens: `--rd-color-canvas-default`, `--rd-color-fg-default`, `--rd-color-border-default`, `--rd-color-backdrop`, `--rd-radius-medium`, `--rd-font-size-300`, `--rd-space-2` to `--rd-space-5`.
 
 ### ReviewBadges
 
@@ -472,7 +500,8 @@ These apply on top of any state whose PR list column shows a list.
 
 ## Interaction and accessibility
 
-Tab order follows the visual order: header (grouping select) → QueryBar (input, Apply, Reset) → StatusBar (Refresh, Log out) → for each group, table header sort buttons → PR title links row by row.
+Tab order follows the visual order: header (grouping select, Settings) → QueryBar (input, Apply, Reset) → StatusBar (Refresh) → for each group, table header sort buttons → PR title links row by row.
+In the settings dialog: Show relative times → Auto refresh → Log out → Close.
 On the PAT input screen: PAT input → Save → Log out.
 
 Focus ring: every focusable element shows `outline: var(--rd-border-width-focus) solid var(--rd-color-focus); outline-offset: 2px;` on `:focus-visible`.
@@ -482,7 +511,7 @@ The ring is drawn with `outline`, never `box-shadow`, so it stays visible in for
 |---|---|---|
 | 1.1.1 Non-text Content | Avatars, review badges, icons | Avatars have `alt=""`; badges carry names through `role="img"` and `aria-label`; decorative icons are `aria-hidden="true"` |
 | 1.3.1 Info and Relationships | Tables, headings, forms, badge list | `<th scope="col">`, `<h1>`/`<h2>`, `<label for>`, `<ul>`/`<li>` |
-| 1.4.1 Use of Color | Review states, diff stat, errors | Review states differ by shape; diff numbers carry `+`/`-` signs; errors have text and an icon |
+| 1.4.1 Use of Color | Review states, diff stat, errors, draft rows | Review states differ by shape; diff numbers carry `+`/`-` signs; errors have text and an icon; draft titles carry hidden "(draft)" text and an underline |
 | 1.4.3 Contrast (Minimum) | All text | [Contrast](#contrast) table, threshold 4.5 |
 | 1.4.4 Resize Text | Whole page | `min-height` instead of `height`; font sizes in px scale with browser zoom |
 | 1.4.10 Reflow | Everything but the PR table | [Layout](#layout): wrap down to 320px; the table scrolls as a data table exception |
