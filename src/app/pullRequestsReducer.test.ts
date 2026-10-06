@@ -163,3 +163,90 @@ describe("pullRequestsReducer", () => {
 		}
 	});
 });
+
+describe("pullRequestsReducer: cache states", () => {
+	const started = (state: PullRequestsState, storedCache: Cache | null): PullRequestsState =>
+		run(state, { type: "started", storedCache });
+	const refresh: PullRequestsEvent = { type: "refreshRequested" };
+	const showingCache = started(idle, cacheOf(queryA));
+	const refreshing = run(showingCache, refresh);
+	const errorWithCache = run(refreshing, failed(refreshing));
+
+	it("Idle → ShowingCache: started with a cache for the current query", () => {
+		expect(showingCache).toEqual({ status: "ShowingCache", query: queryA, requestId: 0, cache: cacheOf(queryA) });
+	});
+
+	it("Idle → Fetching: started with a cache for another query (FR-CACHE-6)", () => {
+		expect(started(idle, cacheOf(queryB))).toEqual({ status: "Fetching", query: queryA, requestId: 1 });
+	});
+
+	it("ShowingCache → Refreshing: refreshRequested (background refresh)", () => {
+		expect(refreshing).toEqual({ status: "Refreshing", query: queryA, requestId: 1, cache: cacheOf(queryA) });
+	});
+
+	it("Refreshing → Ready: fetchSucceeded replaces the cache", () => {
+		const fresh: Cache = { ...cacheOf(queryA), fetchedAt: "2026-09-29T00:00:00Z" };
+		const next = run(refreshing, { type: "fetchSucceeded", requestId: refreshing.requestId, cache: fresh, issueCount: 0 });
+		expect(next).toMatchObject({ status: "Ready", cache: fresh });
+	});
+
+	it("Refreshing → ErrorWithCache: fetchFailed keeps the cache", () => {
+		expect(errorWithCache).toEqual({
+			status: "ErrorWithCache",
+			query: queryA,
+			requestId: 1,
+			cache: cacheOf(queryA),
+			error: networkError,
+		});
+	});
+
+	it("Refreshing → ErrorWithCache: fetchFailed with kind Unauthorized (until T4.1)", () => {
+		const unauthorized: FetchFailure = { kind: "Unauthorized", message: "Bad credentials" };
+		expect(run(refreshing, failed(refreshing, unauthorized))).toMatchObject({ status: "ErrorWithCache" });
+	});
+
+	it("Ready → Refreshing: refreshRequested (manual refresh)", () => {
+		expect(run(ready, refresh)).toEqual({ status: "Refreshing", query: queryA, requestId: 2, cache: cacheOf(queryA) });
+	});
+
+	it("ErrorWithCache → Refreshing: refreshRequested", () => {
+		expect(run(errorWithCache, refresh)).toMatchObject({ status: "Refreshing", requestId: 2, cache: cacheOf(queryA) });
+	});
+
+	it("Error → Fetching: refreshRequested", () => {
+		expect(run(error, refresh)).toEqual({ status: "Fetching", query: queryA, requestId: 2 });
+	});
+
+	it("refreshRequested in Idle / Fetching / Refreshing returns the same state", () => {
+		for (const state of [idle, fetching, refreshing]) {
+			expect(run(state, refresh)).toBe(state);
+		}
+	});
+
+	it("requestId increments when entering Refreshing", () => {
+		expect(refreshing.requestId).toBe(showingCache.requestId + 1);
+	});
+
+	it.each([
+		["ShowingCache", showingCache],
+		["Refreshing", refreshing],
+		["ErrorWithCache", errorWithCache],
+	])("queryApplied from %s returns Idle with the new query", (_, state) => {
+		expect(run(state, { type: "queryApplied", query: queryB })).toEqual({
+			status: "Idle",
+			query: queryB,
+			requestId: state.requestId,
+		});
+	});
+
+	it("stale fetchSucceeded during Refreshing is ignored", () => {
+		const again = run(refreshing, failed(refreshing), refresh);
+		expect(run(again, succeeded(refreshing))).toBe(again);
+	});
+
+	it("ShowingCache and ErrorWithCache carry no issueCount; Ready carries issueCount and truncated", () => {
+		expect(showingCache).not.toHaveProperty("issueCount");
+		expect(errorWithCache).not.toHaveProperty("issueCount");
+		expect(run(refreshing, succeeded(refreshing, 1500))).toMatchObject({ issueCount: 1500, truncated: true });
+	});
+});
