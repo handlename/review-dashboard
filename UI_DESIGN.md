@@ -441,14 +441,14 @@ Shows the latest review per reviewer (FR-LIST-3).
 
 Elements:
 
-- `<ul>` with no bullets, laid out in a single row with `--rd-space-1` gap; each item is `<li>`
+- `<ul>` with no bullets, laid out in rows with `--rd-space-1` gap that wrap within the cell; each item is `<li>`
 - Each review badge is `<span role="img" aria-label="carol: Approved" title="carol: Approved">` containing:
   - A 20px round avatar `<img alt="" referrerpolicy="no-referrer">`, with the same placeholder and ghost rules as the [Author cell](#author-cell)
   - The 12px review state icon, overlapping the bottom-right corner of the avatar by 4px, with a 2px ring in `--rd-color-canvas-default`
 - The text in `aria-label` and `title` is `<login>: <Label>` using the Label column of [Review states](#review-states). A null reviewer uses `ghost` as the login
 - Badges are ordered by submitted time ascending
-- Badge centers are 24px apart
-- Up to 6 items are shown. With 7 or more reviews, the first 5 badges are shown and the 6th item is a `+N` badge (N = remaining count): a 20px circle in `--rd-color-canvas-subtle` with `+N` in `--rd-font-size-100`, as `<span role="img">` whose `aria-label` and `title` list every hidden review as `<login>: <Label>` separated by commas
+- Badge centers are 24px apart, horizontally and between wrapped rows
+- Every review is shown as a badge. Badges that do not fit in the column width wrap to the next row, and the row grows taller
 - With no reviews, the cell contains `<span aria-hidden="true">—</span><span class="visually-hidden">No reviews</span>`
 
 Behavior:
@@ -456,7 +456,7 @@ Behavior:
 - Badges are not focusable and not clickable, so they are not pointer targets and 2.5.8 does not apply to them
 - The tooltip is the browser's `title` tooltip
 
-Used tokens: review state colors from [Review states](#review-states), `--rd-color-canvas-default`, `--rd-color-canvas-subtle`, `--rd-color-canvas-inset`, `--rd-radius-full`.
+Used tokens: review state colors from [Review states](#review-states), `--rd-color-canvas-default`, `--rd-color-canvas-inset`, `--rd-radius-full`.
 States: [PR list column](#state-matrix).
 
 ## States
