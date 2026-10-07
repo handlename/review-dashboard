@@ -50,12 +50,18 @@ A fetch the user starts by pressing the refresh button. (FR-CACHE-4)
 ### PR (PullRequest)
 
 A single pull request shown in the list.
-It has a PR number, title, draft flag, URL, repository, author, diff stat, created date, updated date, and a list of latest reviews. (FR-LIST-1)
+It has a PR number, title, draft flag, URL, repository, author, diff stat, created date, updated date, a list of latest reviews, and its stack position. (FR-LIST-1)
 
 ### Draft (isDraft)
 
 A PR marked as a draft on GitHub.
 The default query excludes drafts; when the search query includes them, their rows are shown muted. (FR-LIST-12)
+
+### Stack (stacked PR)
+
+A series of PRs built on top of each other, using GitHub's native stacked pull requests.
+A PR's stack position (StackPosition) holds the stack number, the PR's position in the stack (1 is closest to the base branch), and the stack size; it is absent for PRs not in a stack.
+The list shows the position and size as `n/m` after the title, using GitHub's values as-is. (FR-LIST-14)
 
 ### Actor (Actor)
 

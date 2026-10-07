@@ -94,6 +94,12 @@ type Review = {
   readonly submittedAt: string;  // ISO 8601
 };
 
+type StackPosition = {
+  readonly number: number;     // stack number within the repository
+  readonly position: number;   // 1 is closest to the base branch
+  readonly size: number;
+};
+
 type PullRequest = {
   readonly number: number;
   readonly title: string;
@@ -106,6 +112,7 @@ type PullRequest = {
   readonly createdAt: string;
   readonly updatedAt: string;
   readonly latestReviews: readonly Review[];
+  readonly stack: StackPosition | null;   // null when not in a stacked PR
 };
 
 type Grouping = "none" | "owner" | "repository";
@@ -162,6 +169,7 @@ query SearchPullRequests($query: String!, $after: String) {
         latestReviews(first: 20) {
           nodes { author { login avatarUrl(size: 40) } state submittedAt }
         }
+        stackEntry { position stack { number size } }
       }
     }
   }
@@ -171,6 +179,7 @@ query SearchPullRequests($query: String!, $after: String) {
 - `latestReviews` already returns the latest review per reviewer, so the app does not need to aggregate them (FR-LIST-3)
 - A search query without `is:pr` can also return issues, so non-PullRequest nodes are dropped during conversion
 - `avatarUrl(size: 40)` requests images at twice the 20px display size
+- `stackEntry` is null for PRs not in a stacked PR; its `stack` can also be null, and either case becomes `stack: null` (FR-LIST-14)
 - Paginate with `endCursor` until `hasNextPage` is false or 1,000 results are reached (NFR-6)
 
 ### Authentication and errors
@@ -237,6 +246,7 @@ When the storage format changes, bump the version and stop reading the old keys.
 - On read, parse the JSON and validate its shape; treat invalid values as absent
 - View settings saved before `relativeTime` and `autoRefreshMinutes` existed are still read: those two fields fall back to their defaults when missing or invalid, while grouping and sort keep their values
 - Caches saved before `isDraft` existed fail validation and are discarded
+- Caches saved before `stack` existed fail validation and are discarded in the same way
 - If localStorage is unavailable or a write fails because the quota is exceeded, the page keeps working (it just cannot save)
 
 ## Security
@@ -262,7 +272,7 @@ Because the PAT is stored in localStorage, preventing XSS is the top priority. (
 ## Testing
 
 - Unit-test the domain's pure functions (sorting, grouping, search query validation, cache validity) with Vitest
-- Test `githubMapper` with GraphQL response fixtures (including dropping issue nodes, dropping `PENDING`, a null author, a null reviewer, and converting an `avatarUrl` on another host to `null`)
+- Test `githubMapper` with GraphQL response fixtures (including dropping issue nodes, dropping `PENDING`, a null author, a null reviewer, and converting an `avatarUrl` on another host to `null`, and mapping `stackEntry`)
 - Test `storage` against invalid JSON and values in an old format
 - Verify the acceptance criteria in REQUIREMENTS.md manually with a real PAT
 
@@ -275,4 +285,5 @@ Because the PAT is stored in localStorage, preventing XSS is the top priority. (
 | Stale-while-revalidate cache | Gives both instant display and fresh data | TTL-based cache |
 | Opt-in auto refresh, off by default | Keeps the list fresh for users who leave the page open, without spending the search API rate limit for everyone else | Always-on polling |
 | Store everything in localStorage | The data is small and a synchronous API keeps it simple | IndexedDB, sessionStorage (would force re-entering the PAT every session) |
+| Fetch `stackEntry` in the same search query | One request still covers everything the list shows. If GitHub gates or removes the field, every fetch fails; the fix is to drop the field or move it to a separate query | A separate query for stack positions (an extra request per fetch) |
 | No data-fetching library | Fetch triggers are few and a custom hook is enough; fewer dependencies shrink the XSS attack surface | TanStack Query, etc. |

@@ -149,7 +149,7 @@ The Label column is the text used in accessible names and tooltips, and matches 
 
 | Token | Value | Usage |
 |---|---|---|
-| `--rd-radius-medium` | 6px | Buttons, inputs, selects, the table container |
+| `--rd-radius-medium` | 6px | Buttons, inputs, selects, the table container, the stack badge |
 | `--rd-radius-full` | 50% | Avatars, review state icons |
 | `--rd-border-width-thin` | 1px | Control boundaries and decorative rules |
 | `--rd-border-width-focus` | 2px | Focus ring |
@@ -180,6 +180,7 @@ Buttons:
 | Settings | Gear: a ring with eight square teeth and a hole in the center, drawn with strokes | Settings button |
 | Spinner | Three-quarter circle arc that rotates once per second | StatusBar while fetching |
 | External link | Square with an arrow leaving its top-right corner; 12px | After the PR title |
+| Stack | Three stacked layers: a diamond with two chevrons below it, drawn with strokes; 12px | Stack badge |
 | Warning | Circle with an exclamation mark | Before error messages |
 | Ghost | Head-and-shoulders silhouette inside a circle; drawn at avatar size | Missing or failed avatars |
 
@@ -359,7 +360,7 @@ The initial sort is Updated, descending.
 | Column | Content | Align | Width | Sortable | Requirements |
 |---|---|---|---|---|---|
 | Number | `#123`, `--rd-font-size-100` | Right | 56px | Yes | FR-LIST-1, FR-LIST-8 |
-| Title | PR title link, then the external link icon | Left | Remaining, at least 160px | Yes | FR-LIST-1, FR-LIST-4, FR-LIST-8 |
+| Title | PR title link, then the external link icon, then the stack badge | Left | Remaining, at least 160px | Yes | FR-LIST-1, FR-LIST-4, FR-LIST-8, FR-LIST-14 |
 | Owner | Organization login | Left | 96px | Yes | FR-LIST-1, FR-LIST-8 |
 | Repository | Repository name without the owner | Left | 112px | Yes | FR-LIST-1, FR-LIST-8 |
 | Author | See [Author cell](#author-cell) | Left | 88px | Yes (by login) | FR-LIST-1, FR-LIST-8 |
@@ -380,6 +381,7 @@ Elements:
 - Body rows have `min-height: 48px`, padding `--rd-space-2`, a bottom rule in `--rd-color-border-default`, and `--rd-color-row-hover` as background on hover
 - The title is `<a href target="_blank" rel="noopener noreferrer">` in `--rd-color-accent-fg`, underlined on hover and focus, followed by the external link icon and visually hidden text "(opens in a new tab)"
 - The link is rendered only when the URL starts with `https://github.com/` ([ARCHITECTURE.md](ARCHITECTURE.md#security)); otherwise the title is plain text
+- Stack badge (FR-LIST-14): for a PR in a stacked PR, the title (link or plain text) is followed by a badge outside the link with the stack icon and `n/m`, in `--rd-color-fg-muted` and `--rd-font-size-100`, with a `--rd-border-width-thin` `--rd-color-border-default` border and `--rd-radius-medium`. The icon and `n/m` are `aria-hidden="true"` and carry `title` "Stack #20: 2 of 3"; the same text follows as visually hidden text "(Stack #20: 2 of 3)"
 - Diff: `+120` in `--rd-color-success-fg`, `-30` in `--rd-color-danger-fg`, and `4 files` in `--rd-color-fg-muted`. The sort key is additions + deletions ([GLOSSARY.md](GLOSSARY.md#diff-stat-diffstat)); the file count does not affect order
 - Columns that repeat the group heading are hidden (FR-LIST-11): Owner when grouping by organization; Owner and Repository when grouping by repository. The Title column takes the freed width
 - Draft rows (FR-LIST-12): the row has the `pr-draft` class and a `--rd-color-canvas-inset` background (`--rd-color-row-hover` on hover, as for other rows), and its text, title link, and diff numbers are all in `--rd-color-fg-muted`. The title link is always underlined, because its color no longer sets it apart. The title is followed by visually hidden text "(draft)", so the difference is not conveyed by color alone (1.4.1). Avatars and review badges keep their colors
@@ -509,7 +511,7 @@ The ring is drawn with `outline`, never `box-shadow`, so it stays visible in for
 
 | Criterion | Where | How |
 |---|---|---|
-| 1.1.1 Non-text Content | Avatars, review badges, icons | Avatars have `alt=""`; badges carry names through `role="img"` and `aria-label`; decorative icons are `aria-hidden="true"` |
+| 1.1.1 Non-text Content | Avatars, review badges, icons | Avatars have `alt=""`; badges carry names through `role="img"` and `aria-label`; decorative icons are `aria-hidden="true"`; the stack badge hides its icon and `n/m` and carries hidden "(Stack #20: 2 of 3)" text instead |
 | 1.3.1 Info and Relationships | Tables, headings, forms, badge list | `<th scope="col">`, `<h1>`/`<h2>`, `<label for>`, `<ul>`/`<li>` |
 | 1.4.1 Use of Color | Review states, diff stat, errors, draft rows | Review states differ by shape; diff numbers carry `+`/`-` signs; errors have text and an icon; draft titles carry hidden "(draft)" text and an underline |
 | 1.4.3 Contrast (Minimum) | All text | [Contrast](#contrast) table, threshold 4.5 |

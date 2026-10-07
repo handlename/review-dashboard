@@ -65,6 +65,7 @@ Users browse the list of PRs matching a search query, check their review status,
 | FR-LIST-11 | When grouped, columns that repeat the group heading are hidden: the organization column when grouping by organization, and the organization and repository columns when grouping by repository |
 | FR-LIST-12 | Draft PRs can be told apart from other PRs in the list. The default query excludes draft PRs, so this applies when the user's search query includes them |
 | FR-LIST-13 | The created and updated dates can be shown either as absolute times or as times relative to now (e.g. "5 minutes ago"). The choice persists across reloads and logouts. Absolute times are the default |
+| FR-LIST-14 | A PR that belongs to a GitHub stacked PR shows its position in the stack after the title, as `n/m` (n = position, m = number of PRs in the stack). Both numbers are GitHub's values as-is, regardless of which PRs of the stack are in the list |
 
 ### Cache
 
@@ -117,5 +118,6 @@ Users browse the list of PRs matching a search query, check their review status,
 - [ ] Logging out removes the PAT and the cache and returns to the PAT input screen (FR-AUTH-2)
 - [ ] With a search query that includes draft PRs, draft PRs look different from other PRs (FR-LIST-12)
 - [ ] Turning on relative times shows the created and updated dates relative to now, and the setting is kept after a reload (FR-LIST-13, FR-SET-1)
+- [ ] A PR in a stacked PR shows its position as `n/m` after the title, matching GitHub, and a PR not in a stack shows none (FR-LIST-14)
 - [ ] With automatic refresh on, PRs are fetched again after the interval, the time until the next refresh is visible, and a failed fetch is retried only after the next interval (FR-CACHE-7 to FR-CACHE-9)
 - [ ] Saving an invalid PAT shows that the PAT is invalid (FR-AUTH-3)

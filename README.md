@@ -11,6 +11,7 @@ It runs entirely in the browser as a static site hosted on GitHub Pages, and tal
 - **Search-based list**: Shows PRs matching a GitHub search query. The default is `is:pr review-requested:@me state:open archived:false -is:draft`
 - **Editable query**: Change the query at any time; it is kept in the page URL (`?q=...`), so you can bookmark it and open several queries at once
 - **PR details at a glance**: PR number, title, repository, author, diff stat (+additions / -deletions / changed files), created and updated dates
+- **Stack position**: PRs in a GitHub stacked PR show their position in the stack after the title (e.g. `2/3`)
 - **Review status**: The latest review result for each reviewer (Approved / Changes requested / Commented / Dismissed)
 - **Grouping and sorting**: Group by organization or repository (the grouped columns are hidden), and sort by clicking column headers
 - **Instant display**: Cached results appear immediately on access, then refresh in the background
