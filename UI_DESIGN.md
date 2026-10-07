@@ -180,7 +180,7 @@ Buttons:
 | Refresh | Circular arrow | Refresh button |
 | Settings | Gear: a ring with eight square teeth and a hole in the center, drawn with strokes | Settings button |
 | Spinner | Three-quarter circle arc that rotates once per second | StatusBar while fetching |
-| External link | Square with an arrow leaving its top-right corner; 12px | After the PR title |
+| External link | Square with an arrow leaving its top-right corner; 12px | After the PR title, separated by a `--rd-space-1` margin instead of a space so the link underline stops at the title |
 | Stack | Three stacked layers: a diamond with two chevrons below it, drawn with strokes; 12px | Stack badge |
 | Warning | Circle with an exclamation mark | Before error messages |
 | Ghost | Head-and-shoulders silhouette inside a circle; drawn at avatar size | Missing or failed avatars |

@@ -297,6 +297,11 @@ button {
 	text-decoration: none;
 }
 
+/* A margin instead of a space, so the underline does not run past the title. */
+.external-link-icon {
+	margin-left: var(--rd-space-1);
+}
+
 .pr-table a:focus-visible {
 	text-decoration: underline;
 }

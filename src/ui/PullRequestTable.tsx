@@ -36,7 +36,8 @@ function Title(props: { pr: PullRequest }) {
 	const link = url.startsWith("https://github.com/") ? (
 		<a href={url} target="_blank" rel="noopener noreferrer">
 			{title}
-			{draft} <ExternalLinkIcon />
+			{draft}
+			<ExternalLinkIcon />
 			<span className="visually-hidden"> (opens in a new tab)</span>
 		</a>
 	) : (
