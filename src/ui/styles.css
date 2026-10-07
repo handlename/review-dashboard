@@ -26,7 +26,6 @@
 	--rd-font-size-200: 14px;
 	--rd-font-size-300: 16px;
 	--rd-font-size-400: 20px;
-	--rd-font-size-500: 24px;
 	--rd-line-height-tight: 1.25;
 	--rd-line-height-default: 1.5;
 	--rd-font-weight-normal: 400;
@@ -586,7 +585,7 @@ button {
 }
 
 .token-heading {
-	font-size: var(--rd-font-size-500);
+	font-size: var(--rd-font-size-300);
 }
 
 .token-note {

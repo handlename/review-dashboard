@@ -120,14 +120,13 @@ The Label column is the text used in accessible names and tooltips, and matches 
 | `--rd-font-size-200` | 14px |
 | `--rd-font-size-300` | 16px |
 | `--rd-font-size-400` | 20px |
-| `--rd-font-size-500` | 24px |
 | `--rd-line-height-tight` | 1.25 |
 | `--rd-line-height-default` | 1.5 |
 | `--rd-font-weight-normal` | 400 |
 | `--rd-font-weight-semibold` | 600 |
 
 - Body text is `--rd-font-family-sans` at `--rd-font-size-200` with `--rd-line-height-default`
-- The app title (`<h1>`) is `--rd-font-size-400` semibold; group headings (`<h2>`) are `--rd-font-size-300` semibold; the PAT input screen heading (`<h2>`) is `--rd-font-size-500` semibold. Headings use `--rd-line-height-tight`
+- The app title (`<h1>`) is `--rd-font-size-400` semibold; group headings (`<h2>`) are `--rd-font-size-300` semibold; the PAT input screen heading (`<h2>`) is also `--rd-font-size-300` semibold, so no heading is larger than the `<h1>`. Headings use `--rd-line-height-tight`
 - Numeric cells (PR number, diff stat, dates) use `font-variant-numeric: tabular-nums` so digits line up
 - The search query input uses `--rd-font-family-mono`, because the query is GitHub search syntax
 - Only the OS font stacks above are used, following the decision to avoid web fonts and extra assets
@@ -311,7 +310,7 @@ Behavior:
 - In the Unauthorized state, the error line reads "Your token is invalid or expired." and the input has `aria-invalid="true"` (FR-AUTH-3)
 - Log out removes the PAT and the cache (FR-AUTH-2) and shows this screen without the error line and without Log out
 
-Used tokens: `--rd-font-size-500`, `--rd-color-fg-muted`, `--rd-color-danger-fg`, `--rd-color-border-control`, `--rd-control-height`.
+Used tokens: `--rd-font-size-300`, `--rd-color-fg-muted`, `--rd-color-danger-fg`, `--rd-color-border-control`, `--rd-control-height`.
 States: [Unauthorized row](#state-matrix).
 
 ### QueryBar
