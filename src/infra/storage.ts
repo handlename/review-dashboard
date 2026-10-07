@@ -1,6 +1,6 @@
 import type { Cache } from "../domain/cache";
 import { withCache } from "../domain/cache";
-import type { Actor, PullRequest, Review } from "../domain/pullRequest";
+import type { Actor, PullRequest, Review, StackPosition } from "../domain/pullRequest";
 import type { SearchQuery } from "../domain/searchQuery";
 import { createSearchQuery } from "../domain/searchQuery";
 import type { ViewSettings } from "../domain/viewSettings";
@@ -76,6 +76,10 @@ function isReview(value: unknown): value is Review {
 	);
 }
 
+function isStackPosition(value: unknown): value is StackPosition {
+	return isObject(value) && isNumber(value.number) && isNumber(value.position) && isNumber(value.size);
+}
+
 function isPullRequest(value: unknown): value is PullRequest {
 	return (
 		isObject(value) &&
@@ -93,7 +97,8 @@ function isPullRequest(value: unknown): value is PullRequest {
 		isString(value.createdAt) &&
 		isString(value.updatedAt) &&
 		Array.isArray(value.latestReviews) &&
-		value.latestReviews.every(isReview)
+		value.latestReviews.every(isReview) &&
+		(value.stack === null || isStackPosition(value.stack))
 	);
 }
 

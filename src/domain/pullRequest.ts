@@ -23,6 +23,13 @@ export type DiffStat = {
 	readonly changedFiles: number;
 };
 
+// Position in a GitHub stacked pull request; values are taken from GitHub as-is.
+export type StackPosition = {
+	readonly number: number;
+	readonly position: number;
+	readonly size: number;
+};
+
 export type PullRequest = {
 	readonly number: number;
 	readonly title: string;
@@ -35,4 +42,5 @@ export type PullRequest = {
 	readonly createdAt: string;
 	readonly updatedAt: string;
 	readonly latestReviews: readonly Review[];
+	readonly stack: StackPosition | null;
 };

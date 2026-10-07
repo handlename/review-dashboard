@@ -143,6 +143,7 @@ describe("storage: cache", () => {
 					{ reviewer: { login: "carol", avatarUrl: null }, state: "APPROVED", submittedAt: "2026-09-28T00:00:00Z" },
 					{ reviewer: null, state: "DISMISSED", submittedAt: "2026-09-28T01:00:00Z" },
 				],
+				stack: null,
 			},
 		],
 	};
@@ -153,6 +154,12 @@ describe("storage: cache", () => {
 	it("saveCache then loadCache round-trips", () => {
 		saveCache(cache);
 		expect(loadCache(query)).toEqual(cache);
+	});
+
+	it("saveCache then loadCache round-trips a stack position", () => {
+		const stacked = { ...cache, pullRequests: [{ ...pr, stack: { number: 20, position: 2, size: 3 } }] };
+		saveCache(stacked);
+		expect(loadCache(query)).toEqual(stacked);
 	});
 
 	it("keeps caches for several queries", () => {
@@ -215,6 +222,12 @@ describe("storage: cache", () => {
 
 	it("loadCache returns null when a pull request lacks isDraft (old format)", () => {
 		const { isDraft: _, ...old } = pr;
+		store({ ...cache, pullRequests: [old] });
+		expect(loadCache(query)).toBeNull();
+	});
+
+	it("loadCache returns null when a pull request lacks stack (old format)", () => {
+		const { stack: _, ...old } = pr;
 		store({ ...cache, pullRequests: [old] });
 		expect(loadCache(query)).toBeNull();
 	});

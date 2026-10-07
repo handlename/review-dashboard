@@ -41,6 +41,7 @@ query SearchPullRequests($query: String!, $after: String) {
         latestReviews(first: 20) {
           nodes { author { login avatarUrl(size: 40) } state submittedAt }
         }
+        stackEntry { position stack { number size } }
       }
     }
   }

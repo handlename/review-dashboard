@@ -133,6 +133,24 @@ export function SpinnerIcon() {
 	);
 }
 
+export function StackIcon() {
+	return (
+		<svg
+			width="12"
+			height="12"
+			viewBox="0 0 12 12"
+			fill="none"
+			stroke="currentColor"
+			strokeLinejoin="round"
+			aria-hidden="true"
+		>
+			<path d="M6 1 11 3.5 6 6 1 3.5Z" />
+			<path d="M1 6 6 8.5 11 6" />
+			<path d="M1 8.5 6 11 11 8.5" />
+		</svg>
+	);
+}
+
 export function ExternalLinkIcon() {
 	return (
 		<svg

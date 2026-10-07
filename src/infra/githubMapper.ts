@@ -1,4 +1,4 @@
-import type { Actor, PullRequest, Review, ReviewState } from "../domain/pullRequest";
+import type { Actor, PullRequest, Review, ReviewState, StackPosition } from "../domain/pullRequest";
 import { SEARCH_LIMIT } from "../domain/searchQuery";
 
 type ActorNode = { readonly login: string; readonly avatarUrl: string } | null;
@@ -8,6 +8,11 @@ type ReviewNode = {
 	readonly state: string;
 	readonly submittedAt: string | null;
 };
+
+type StackEntryNode = {
+	readonly position: number;
+	readonly stack: { readonly number: number; readonly size: number } | null;
+} | null;
 
 type PullRequestNode = {
 	readonly number: number;
@@ -27,6 +32,7 @@ type PullRequestNode = {
 	readonly latestReviews: {
 		readonly nodes: readonly (ReviewNode | null)[] | null;
 	} | null;
+	readonly stackEntry: StackEntryNode;
 };
 
 // Non-PullRequest results (issues) match no fragment and arrive as empty objects.
@@ -86,6 +92,12 @@ function toReviews(
 	);
 }
 
+function toStack(node: StackEntryNode): StackPosition | null {
+	return node === null || node.stack === null
+		? null
+		: { number: node.stack.number, position: node.position, size: node.stack.size };
+}
+
 export function toPullRequests(
 	nodes: readonly (SearchNode | null)[],
 ): readonly PullRequest[] {
@@ -107,6 +119,7 @@ export function toPullRequests(
 		createdAt: node.createdAt,
 		updatedAt: node.updatedAt,
 		latestReviews: toReviews(node.latestReviews?.nodes ?? null),
+		stack: toStack(node.stackEntry),
 	}));
 }
 

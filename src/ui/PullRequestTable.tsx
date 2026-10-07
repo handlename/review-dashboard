@@ -1,7 +1,7 @@
-import type { PullRequest } from "../domain/pullRequest";
+import type { PullRequest, StackPosition } from "../domain/pullRequest";
 import type { Grouping, SortDirection, SortKey } from "../domain/viewSettings";
 import { formatDateTime, formatFileCount, formatNumber, formatRelativeTime } from "./format";
-import { ExternalLinkIcon, SortIcon } from "./icons";
+import { ExternalLinkIcon, SortIcon, StackIcon } from "./icons";
 import { Avatar, ReviewBadges, loginOf } from "./ReviewBadges";
 
 // `now` is null when absolute times are shown.
@@ -17,23 +17,39 @@ function DateTime(props: { iso: string; now: Date | null }) {
 	);
 }
 
-function Title(props: { pr: PullRequest }) {
-	const { title, url, isDraft } = props.pr;
-	const draft = isDraft && <span className="visually-hidden"> (draft)</span>;
-	if (!url.startsWith("https://github.com/")) {
-		return (
-			<>
-				{title}
-				{draft}
-			</>
-		);
-	}
+function StackBadge(props: { stack: StackPosition }) {
+	const { number, position, size } = props.stack;
+	const label = `Stack #${number}: ${position} of ${size}`;
 	return (
+		<span className="stack-badge">
+			<span aria-hidden="true" title={label}>
+				<StackIcon /> {position}/{size}
+			</span>
+			<span className="visually-hidden"> ({label})</span>
+		</span>
+	);
+}
+
+function Title(props: { pr: PullRequest }) {
+	const { title, url, isDraft, stack } = props.pr;
+	const draft = isDraft && <span className="visually-hidden"> (draft)</span>;
+	const link = url.startsWith("https://github.com/") ? (
 		<a href={url} target="_blank" rel="noopener noreferrer">
 			{title}
 			{draft} <ExternalLinkIcon />
 			<span className="visually-hidden"> (opens in a new tab)</span>
 		</a>
+	) : (
+		<>
+			{title}
+			{draft}
+		</>
+	);
+	return (
+		<>
+			{link}
+			{stack !== null && <StackBadge stack={stack} />}
+		</>
 	);
 }
 

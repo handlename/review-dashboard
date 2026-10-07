@@ -22,6 +22,7 @@ function prNode(overrides: Record<string, unknown> = {}): SearchNode {
 			owner: { login: "handlename" },
 		},
 		latestReviews: { nodes: [] },
+		stackEntry: null,
 		...overrides,
 	} as SearchNode;
 }
@@ -81,6 +82,23 @@ describe("toPullRequests", () => {
 	it("maps isDraft", () => {
 		const [pr] = toPullRequests([prNode({ isDraft: true })]);
 		expect(pr.isDraft).toBe(true);
+	});
+
+	it("maps stackEntry to stack", () => {
+		const [pr] = toPullRequests([
+			prNode({ stackEntry: { position: 2, stack: { number: 20, size: 3 } } }),
+		]);
+		expect(pr.stack).toEqual({ number: 20, position: 2, size: 3 });
+	});
+
+	it("maps null stackEntry to null", () => {
+		const [pr] = toPullRequests([prNode()]);
+		expect(pr.stack).toBeNull();
+	});
+
+	it("maps stackEntry without stack to null", () => {
+		const [pr] = toPullRequests([prNode({ stackEntry: { position: 1, stack: null } })]);
+		expect(pr.stack).toBeNull();
 	});
 
 	it("maps null author to null", () => {
