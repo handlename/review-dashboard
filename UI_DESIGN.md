@@ -244,7 +244,7 @@ Shown when a PAT is saved and the state is not Unauthorized.
 | Search query                                                                                 |  QueryBar, padding space-4 gutter
 | [ is:pr review-requested:@me state:open archived:false         ] [ Apply ] [ Reset ]         |  gap space-2
 +----------------------------------------------------------------------------------------------+
-| Last fetched 2026-09-28 14:05   (spinner) Refreshing...                    [ Refresh ]       |  StatusBar, min-height 40px, fg-muted
+| Last fetched 2026-09-28 14:05   (spinner) Refreshing…                      [ Refresh ]       |  StatusBar, min-height 40px, fg-muted
 |                                                                            ▔▔▔▔▔▔           |  auto refresh bar along the bottom edge of Refresh
 | (!) Could not reach GitHub. Check your connection and press Refresh.                         |  error line, danger-fg
 +----------------------------------------------------------------------------------------------+
@@ -471,10 +471,10 @@ Rows are the states of `usePullRequests` in [ARCHITECTURE.md](ARCHITECTURE.md#st
 |---|---|---|---|---|
 | Idle | Dashboard | Enabled | Unchanged from the previous render | Nothing rendered. Idle moves to the next state synchronously, so it is never painted |
 | ShowingCache | Dashboard | Enabled | "Last fetched <fetchedAt>" | Cached list |
-| Refreshing | Dashboard | Enabled; Apply aborts the refresh | "Last fetched <fetchedAt>", spinner, "Refreshing..."; Refresh is `aria-disabled`. Status: "Refreshing pull requests" | Cached list is kept (FR-CACHE-3) |
+| Refreshing | Dashboard | Enabled; Apply aborts the refresh | "Last fetched <fetchedAt>", spinner, "Refreshing…"; Refresh is `aria-disabled`. Status: "Refreshing pull requests" | Cached list is kept (FR-CACHE-3) |
 | Ready | Dashboard | Enabled | "Last fetched <fetchedAt>". Status: "Updated. <n> pull requests" | Fetched list |
 | ErrorWithCache | Dashboard | Enabled | "Last fetched <fetchedAt>" and the error line. Alert: the error message | Cached list is kept (FR-ERR-2) |
-| Fetching | Dashboard | Enabled; Apply aborts the fetch | "Not fetched yet", spinner, "Loading..."; Refresh is `aria-disabled`. Status: "Loading pull requests" | "Loading pull requests..." in `--rd-color-fg-muted` |
+| Fetching | Dashboard | Enabled; Apply aborts the fetch | "Not fetched yet", spinner, "Loading…"; Refresh is `aria-disabled`. Status: "Loading pull requests" | "Loading pull requests…" in `--rd-color-fg-muted` |
 | Error | Dashboard | Enabled | "Not fetched yet" and the error line. Alert: the error message | "Could not load pull requests." in `--rd-color-fg-muted` |
 | Unauthorized | PAT input screen with the error line and Log out | Not rendered | Not rendered. Alert: "Your token is invalid or expired." | Not rendered |
 

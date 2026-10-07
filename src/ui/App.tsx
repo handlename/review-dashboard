@@ -60,7 +60,7 @@ function PullRequestList(props: {
 	const { state, groups, viewSettings, onSort, now } = props;
 	switch (state.status) {
 		case "Fetching":
-			return <p className="muted list-message">Loading pull requests...</p>;
+			return <p className="muted list-message">Loading pull requests…</p>;
 		case "Error":
 			return <p className="muted list-message">Could not load pull requests.</p>;
 		default: {

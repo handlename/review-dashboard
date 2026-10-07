@@ -17,11 +17,11 @@ function statusView(state: PullRequestsState): StatusView | null {
 		case "Ready":
 			return { cache: state.cache, progress: null, error: null };
 		case "Refreshing":
-			return { cache: state.cache, progress: "Refreshing...", error: null };
+			return { cache: state.cache, progress: "Refreshing…", error: null };
 		case "ErrorWithCache":
 			return { cache: state.cache, progress: null, error: state.error };
 		case "Fetching":
-			return { cache: null, progress: "Loading...", error: null };
+			return { cache: null, progress: "Loading…", error: null };
 		case "Error":
 			return { cache: null, progress: null, error: state.error };
 		default:
