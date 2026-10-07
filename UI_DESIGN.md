@@ -38,11 +38,11 @@ They are declared on `:root` in a single stylesheet bundled at build time.
 | `--rd-color-fg-muted` | #59636e | #9198a1 | Secondary text: login under avatars, file count, group count, helper text, placeholder |
 | `--rd-color-fg-on-emphasis` | #ffffff | #ffffff | Text and glyphs on emphasis fills (primary button, review state icons) |
 | `--rd-color-canvas-default` | #ffffff | #0d1117 | Page background, input background, ring around review state icons |
-| `--rd-color-canvas-subtle` | #f6f8fa | #151b23 | Table header background, secondary button background |
+| `--rd-color-canvas-subtle` | #f6f8fa | #151b23 | Table header background, secondary and danger button background |
 | `--rd-color-canvas-inset` | #eff2f5 | #010409 | Avatar placeholder before the image loads, draft row background |
 | `--rd-color-row-hover` | #f0f3f6 | #1c222b | Table row background on hover |
 | `--rd-color-border-default` | #d1d9e0 | #3d444d | Decorative rules: table row separators, section dividers |
-| `--rd-color-border-control` | #818b98 | #656c76 | Boundaries of inputs, selects, and secondary buttons |
+| `--rd-color-border-control` | #818b98 | #656c76 | Boundaries of inputs, selects, and secondary and danger buttons |
 | `--rd-color-accent-fg` | #0969da | #4493f8 | Links (PR title) |
 | `--rd-color-accent-emphasis` | #0969da | #1f6feb | Primary button background |
 | `--rd-color-success-fg` | #1a7f37 | #3fb950 | Added lines in the diff stat |
