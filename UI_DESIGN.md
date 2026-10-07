@@ -548,6 +548,7 @@ Numbers:
 
 - Formatted with `Intl.NumberFormat("en-US")`, for example `12,345`
 - Diff stat: `+12,345` and `-1,234`; the file count is `1 file` for one file and `n files` otherwise
+- PR count in the status live region: `1 pull request` for one PR and `n pull requests` otherwise, for example `Updated. 1,000 pull requests`
 - PR number: `#` followed by the number without separators, for example `#12345`, matching GitHub
 
 ## Constraints checklist

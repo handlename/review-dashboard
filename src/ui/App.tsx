@@ -6,7 +6,7 @@ import { useNow } from "../app/useNow";
 import { useSettings } from "../app/useSettings";
 import type { PullRequestGroup } from "../domain/group";
 import type { Grouping, SortKey, ViewSettings } from "../domain/viewSettings";
-import { formatNumber } from "./format";
+import { formatNumber, formatPullRequestCount } from "./format";
 import { GroupSection } from "./GroupSection";
 import { GearIcon } from "./icons";
 import { PullRequestTable } from "./PullRequestTable";
@@ -111,7 +111,7 @@ function liveRegionTexts(state: PullRequestsState, count: number): { status: str
 		case "Fetching":
 			return { status: "Loading pull requests", alert: "" };
 		case "Ready":
-			return { status: `Updated. ${count} pull requests`, alert: "" };
+			return { status: `Updated. ${formatPullRequestCount(count)}`, alert: "" };
 		case "ErrorWithCache":
 		case "Error":
 			return { status: "", alert: errorMessage(state.error) };

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatDateTime, formatFileCount, formatMinutes, formatNumber, formatRelativeTime } from "./format";
+import { formatDateTime, formatFileCount, formatMinutes, formatNumber, formatPullRequestCount, formatRelativeTime } from "./format";
 
 describe("format", () => {
 	it("formatDateTime pads month, day, hour, and minute", () => {
@@ -47,5 +47,11 @@ describe("format", () => {
 		expect(formatFileCount(1)).toBe("1 file");
 		expect(formatFileCount(0)).toBe("0 files");
 		expect(formatFileCount(2)).toBe("2 files");
+	});
+
+	it('formatPullRequestCount returns "1 pull request" for 1 and separates thousands otherwise', () => {
+		expect(formatPullRequestCount(1)).toBe("1 pull request");
+		expect(formatPullRequestCount(0)).toBe("0 pull requests");
+		expect(formatPullRequestCount(1000)).toBe("1,000 pull requests");
 	});
 });
