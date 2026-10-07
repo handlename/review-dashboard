@@ -47,7 +47,7 @@ They are declared on `:root` in a single stylesheet bundled at build time.
 | `--rd-color-accent-emphasis` | #0969da | #1f6feb | Primary button background |
 | `--rd-color-success-fg` | #1a7f37 | #3fb950 | Added lines in the diff stat |
 | `--rd-color-success-emphasis` | #1f883d | #238636 | APPROVED icon fill |
-| `--rd-color-danger-fg` | #d1242f | #f85149 | Deleted lines in the diff stat, error text |
+| `--rd-color-danger-fg` | #d1242f | #f85149 | Deleted lines in the diff stat, error text, the danger button label |
 | `--rd-color-danger-emphasis` | #cf222e | #da3633 | CHANGES_REQUESTED icon fill |
 | `--rd-color-neutral-emphasis` | #59636e | #656c76 | COMMENTED and DISMISSED icon fill |
 | `--rd-color-focus` | #0969da | #1f6feb | Focus ring |
@@ -160,7 +160,8 @@ Buttons:
 | Variant | Background | Text | Border | Used for |
 |---|---|---|---|---|
 | Primary | `--rd-color-accent-emphasis` | `--rd-color-fg-on-emphasis` | none | Save, Apply |
-| Secondary | `--rd-color-canvas-subtle` | `--rd-color-fg-default` | `--rd-border-width-thin` `--rd-color-border-control` | Reset, Refresh, Log out, Settings |
+| Secondary | `--rd-color-canvas-subtle` | `--rd-color-fg-default` | `--rd-border-width-thin` `--rd-color-border-control` | Reset, Refresh, Settings, Log out on the PAT input screen |
+| Danger | `--rd-color-canvas-subtle` | `--rd-color-danger-fg` | `--rd-border-width-thin` `--rd-color-border-control` | Log out in SettingsDialog, which removes a working PAT |
 
 - Buttons have `min-height: var(--rd-control-height)`, horizontal padding `--rd-space-3`, `--rd-radius-medium`, and semibold `--rd-font-size-200` text
 - A button with `aria-disabled="true"` keeps its colors and gets `cursor: not-allowed` and 60% opacity on its label only; it stays focusable
@@ -423,7 +424,7 @@ Elements:
 - A native `<dialog>` opened as a modal with `showModal()`, labelled by its `<h2>` "Settings" through `aria-labelledby`
 - "Show relative times" checkbox with a `<label for>` (FR-LIST-13)
 - "Auto refresh" visible `<label>` and a `<select>` with options Off, 1 minute, 5 minutes, 10 minutes, 30 minutes (FR-CACHE-7)
-- Below a `--rd-color-border-default` rule: Log out (secondary) at the left end and Close (primary) at the right end (FR-AUTH-2)
+- Below a `--rd-color-border-default` rule: the line "Logging out removes the saved token and cached results from this browser." in `--rd-color-fg-muted`, then Log out (danger) at the left end and Close (primary) at the right end (FR-AUTH-2). Log out points at the line with `aria-describedby`
 - `::backdrop` in `--rd-color-backdrop`
 
 Behavior:
@@ -433,7 +434,7 @@ Behavior:
 - Log out closes the dialog, removes the PAT and the cache (FR-AUTH-2), and shows the PAT input screen
 - The settings are kept across reloads and logouts ([ARCHITECTURE.md](ARCHITECTURE.md#persistence))
 
-Used tokens: `--rd-color-canvas-default`, `--rd-color-fg-default`, `--rd-color-border-default`, `--rd-color-backdrop`, `--rd-radius-medium`, `--rd-font-size-300`, `--rd-space-2` to `--rd-space-5`.
+Used tokens: `--rd-color-canvas-default`, `--rd-color-fg-default`, `--rd-color-fg-muted`, `--rd-color-danger-fg`, `--rd-color-border-default`, `--rd-color-backdrop`, `--rd-radius-medium`, `--rd-font-size-300`, `--rd-space-2` to `--rd-space-5`.
 
 ### ReviewBadges
 

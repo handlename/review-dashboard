@@ -144,6 +144,10 @@ button {
 	border: var(--rd-border-width-thin) solid var(--rd-color-border-control);
 }
 
+.button-danger {
+	color: var(--rd-color-danger-fg);
+}
+
 .button[aria-disabled="true"] {
 	cursor: not-allowed;
 }
@@ -551,13 +555,17 @@ button {
 	margin-bottom: var(--rd-space-3);
 }
 
+.settings-footer {
+	margin-top: var(--rd-space-5);
+	padding-top: var(--rd-space-4);
+	border-top: var(--rd-border-width-thin) solid var(--rd-color-border-default);
+}
+
 .settings-actions {
 	display: flex;
 	justify-content: space-between;
 	gap: var(--rd-space-2);
-	margin-top: var(--rd-space-5);
-	padding-top: var(--rd-space-4);
-	border-top: var(--rd-border-width-thin) solid var(--rd-color-border-default);
+	margin-top: var(--rd-space-3);
 }
 
 .token-form {
