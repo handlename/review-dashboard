@@ -243,8 +243,10 @@ button {
 	border-bottom: 0;
 }
 
-.pr-table tbody tr:hover {
-	background: var(--rd-color-row-hover);
+@media (hover: hover) {
+	.pr-table tbody tr:hover {
+		background: var(--rd-color-row-hover);
+	}
 }
 
 .col-number {
@@ -295,9 +297,14 @@ button {
 	text-decoration: none;
 }
 
-.pr-table a:hover,
 .pr-table a:focus-visible {
 	text-decoration: underline;
+}
+
+@media (hover: hover) {
+	.pr-table a:hover {
+		text-decoration: underline;
+	}
 }
 
 .diff-additions {

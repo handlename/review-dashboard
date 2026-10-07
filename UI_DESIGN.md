@@ -379,7 +379,7 @@ Elements:
 - A sortable header contains a `<button>` that fills the cell and has the column name as its text. The active column shows the sort icon after the name, with `aria-hidden="true"`
 - `aria-sort` is set only on the `<th>` of the active sort column (`ascending` or `descending`). Initially the Updated `<th>` has `aria-sort="descending"`
 - The Reviews header is plain text, not a button
-- Body rows have `min-height: 48px`, padding `--rd-space-2`, a bottom rule in `--rd-color-border-default`, and `--rd-color-row-hover` as background on hover
+- Body rows have `min-height: 48px`, padding `--rd-space-2`, a bottom rule in `--rd-color-border-default`, and `--rd-color-row-hover` as background on hover. Hover styles in the table apply only inside `@media (hover: hover)`, so they do not stick after a tap on touch screens
 - The title is `<a href target="_blank" rel="noopener noreferrer">` in `--rd-color-accent-fg`, underlined on hover and focus, followed by the external link icon and visually hidden text "(opens in a new tab)"
 - The link is rendered only when the URL starts with `https://github.com/` ([ARCHITECTURE.md](ARCHITECTURE.md#security)); otherwise the title is plain text
 - Stack badge (FR-LIST-14): for a PR in a stacked PR, the title (link or plain text) is followed by a badge outside the link with the stack icon and `n/m`, in `--rd-color-fg-muted` and `--rd-font-size-100`, with a `--rd-border-width-thin` `--rd-color-border-default` border and `--rd-radius-medium`. The icon and `n/m` are `aria-hidden="true"` and carry `title` "Stack #20: 2 of 3"; the same text follows as visually hidden text "(Stack #20: 2 of 3)"
