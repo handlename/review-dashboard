@@ -483,7 +483,7 @@ Error messages (FR-ERR-1):
 |---|---|
 | Network | "Could not reach GitHub. Check your connection and press Refresh." |
 | RateLimit | "GitHub rate limit reached. Try again later." |
-| Other | "GitHub returned an error: <message from the response>" |
+| Other | "Check the search query and press Refresh. GitHub returned an error: <message from the response>" |
 
 HTTP 401 is not in this table; it leads to Unauthorized.
 

@@ -38,7 +38,7 @@ export function errorMessage(error: FetchFailure): string {
 		case "Unauthorized":
 			return "Your token is invalid or expired.";
 		case "Other":
-			return `GitHub returned an error: ${error.message}`;
+			return `Check the search query and press Refresh. GitHub returned an error: ${error.message}`;
 	}
 }
 
