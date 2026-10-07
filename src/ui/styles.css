@@ -572,6 +572,12 @@ button {
 	border-top: var(--rd-border-width-thin) solid var(--rd-color-border-default);
 }
 
+.settings-checkbox {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--rd-space-2);
+}
+
 .settings-actions {
 	display: flex;
 	justify-content: space-between;

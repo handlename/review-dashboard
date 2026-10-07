@@ -15,7 +15,6 @@ export function SettingsDialog(props: {
 	onLogout(): void;
 }) {
 	const headingId = useId();
-	const relativeTimeId = useId();
 	const autoRefreshId = useId();
 	const logoutHintId = useId();
 	const close = () => props.dialogRef.current?.close();
@@ -26,13 +25,15 @@ export function SettingsDialog(props: {
 				Settings
 			</h2>
 			<div className="settings-field">
-				<input
-					id={relativeTimeId}
-					type="checkbox"
-					checked={props.relativeTime}
-					onChange={(e) => props.onRelativeTimeChange(e.target.checked)}
-				/>
-				<label htmlFor={relativeTimeId}>Show relative times</label>
+				{/* Wrapping the input makes the gap between it and the text clickable too. */}
+				<label className="settings-checkbox">
+					<input
+						type="checkbox"
+						checked={props.relativeTime}
+						onChange={(e) => props.onRelativeTimeChange(e.target.checked)}
+					/>
+					Show relative times
+				</label>
 			</div>
 			<div className="settings-field">
 				<label className="field-label" htmlFor={autoRefreshId}>

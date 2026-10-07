@@ -421,7 +421,7 @@ States: [PR list column](#state-matrix).
 Elements:
 
 - A native `<dialog>` opened as a modal with `showModal()`, labelled by its `<h2>` "Settings" through `aria-labelledby`
-- "Show relative times" checkbox with a `<label for>` (FR-LIST-13)
+- "Show relative times" checkbox wrapped in its `<label>` with a `--rd-space-2` gap, so the gap is part of the click target (FR-LIST-13)
 - "Auto refresh" visible `<label>` and a `<select>` with options Off, 1 minute, 5 minutes, 10 minutes, 30 minutes (FR-CACHE-7)
 - Below a `--rd-color-border-default` rule: the line "Logging out removes the saved token and cached results from this browser." in `--rd-color-fg-muted`, then Log out (danger) at the left end and Close (primary) at the right end (FR-AUTH-2). Log out points at the line with `aria-describedby`
 - `::backdrop` in `--rd-color-backdrop`
