@@ -250,7 +250,7 @@ Shown when a PAT is saved and the state is not Unauthorized.
 +----------------------------------------------------------------------------------------------+
 | handlename/review-dashboard (2)                                                              |  GroupSection h2, space-5 above
 | +------+----------------------------------+--------+-----------+----------+---------+-------+|
-| | #    | Title                            | Author | Reviews   | Diff     | Created | Upd.v ||  thead, canvas-subtle; Owner and Repository hidden
+| | #    | Title                            | Author | Reviews   | Diff     | Created | Upd.v ||  thead, canvas-subtle; Organization and Repository hidden
 | +------+----------------------------------+--------+-----------+----------+---------+-------+|
 | | 123  | Fix pagination bug               |  (o)   | (o)A (o)C | +120 -30 | 2026-09-| 2026- ||  row, min-height 48px
 | |      | [ext]                            | alice  |           | 4 files  | 27 10:02| 09-28 ||
@@ -362,7 +362,7 @@ The initial sort is Updated, descending.
 |---|---|---|---|---|---|
 | Number | `#123`, `--rd-font-size-100` | Right | 56px | Yes | FR-LIST-1, FR-LIST-8 |
 | Title | PR title link, then the external link icon, then the stack badge | Left | Remaining, at least 160px | Yes | FR-LIST-1, FR-LIST-4, FR-LIST-8, FR-LIST-14 |
-| Owner | Organization login | Left | 96px | Yes | FR-LIST-1, FR-LIST-8 |
+| Organization | Organization login | Left | 96px | Yes | FR-LIST-1, FR-LIST-8 |
 | Repository | Repository name without the owner | Left | 112px | Yes | FR-LIST-1, FR-LIST-8 |
 | Author | See [Author cell](#author-cell) | Left | 88px | Yes (by login) | FR-LIST-1, FR-LIST-8 |
 | Reviews | See [ReviewBadges](#reviewbadges) | Left | 152px | No | FR-LIST-3 |
@@ -384,7 +384,7 @@ Elements:
 - The link is rendered only when the URL starts with `https://github.com/` ([ARCHITECTURE.md](ARCHITECTURE.md#security)); otherwise the title is plain text
 - Stack badge (FR-LIST-14): for a PR in a stacked PR, the title (link or plain text) is followed by a badge outside the link with the stack icon and `n/m`, in `--rd-color-fg-muted` and `--rd-font-size-100`, with a `--rd-border-width-thin` `--rd-color-border-default` border and `--rd-radius-medium`. The icon and `n/m` are `aria-hidden="true"` and carry `title` "Stack #20: 2 of 3"; the same text follows as visually hidden text "(Stack #20: 2 of 3)"
 - Diff: `+120` in `--rd-color-success-fg`, `-30` in `--rd-color-danger-fg`, and `4 files` in `--rd-color-fg-muted`. The sort key is additions + deletions ([GLOSSARY.md](GLOSSARY.md#diff-stat-diffstat)); the file count does not affect order
-- Columns that repeat the group heading are hidden (FR-LIST-11): Owner when grouping by organization; Owner and Repository when grouping by repository. The Title column takes the freed width
+- Columns that repeat the group heading are hidden (FR-LIST-11): Organization when grouping by organization; Organization and Repository when grouping by repository. The Title column takes the freed width
 - Draft rows (FR-LIST-12): the row has the `pr-draft` class and a `--rd-color-canvas-inset` background (`--rd-color-row-hover` on hover, as for other rows), and its text, title link, and diff numbers are all in `--rd-color-fg-muted`. The title link is always underlined, because its color no longer sets it apart. The title is followed by visually hidden text "(draft)", so the difference is not conveyed by color alone (1.4.1). Avatars and review badges keep their colors
 - Created and Updated are `<time datetime>` elements with the ISO 8601 time. With relative times on (FR-LIST-13), they show the time relative to now in English, such as "5 minutes ago", "yesterday", or "last month", and the absolute date and time in `title`. Times less than a minute old, including times slightly in the future, show "now". The relative times are recomputed every minute. Sorting uses the timestamps, not the displayed text
 

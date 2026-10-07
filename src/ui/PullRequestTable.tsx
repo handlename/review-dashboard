@@ -56,7 +56,7 @@ function Title(props: { pr: PullRequest }) {
 const COLUMNS: readonly { readonly key: SortKey | null; readonly label: string; readonly className: string }[] = [
 	{ key: "number", label: "#", className: "col-number" },
 	{ key: "title", label: "Title", className: "col-title" },
-	{ key: "owner", label: "Owner", className: "col-owner" },
+	{ key: "owner", label: "Organization", className: "col-owner" },
 	{ key: "repository", label: "Repository", className: "col-repository" },
 	{ key: "author", label: "Author", className: "col-author" },
 	{ key: null, label: "Reviews", className: "col-reviews" },
