@@ -80,8 +80,7 @@ export function StatusBar(props: { state: PullRequestsState; timer: AutoRefreshT
 						{timer !== null && (
 							<span
 								key={timer.key}
-								className="refresh-timer"
-								style={{ animationDuration: `${timer.minutes * 60}s` }}
+								className={`refresh-timer refresh-timer-${timer.minutes}m`}
 								aria-hidden="true"
 							/>
 						)}

@@ -672,6 +672,20 @@ button {
 	animation-fill-mode: forwards;
 }
 
+/* One class per AUTO_REFRESH_MINUTES value, because the React style prop is not used. */
+.refresh-timer-1m {
+	animation-duration: 60s;
+}
+.refresh-timer-5m {
+	animation-duration: 300s;
+}
+.refresh-timer-10m {
+	animation-duration: 600s;
+}
+.refresh-timer-30m {
+	animation-duration: 1800s;
+}
+
 @keyframes rd-grow {
 	from {
 		transform: scaleX(0);
