@@ -15,8 +15,8 @@ export function SettingsDialog(props: {
 	onLogout(): void;
 }) {
 	const headingId = useId();
-	const relativeTimeId = useId();
 	const autoRefreshId = useId();
+	const logoutHintId = useId();
 	const close = () => props.dialogRef.current?.close();
 
 	return (
@@ -25,13 +25,15 @@ export function SettingsDialog(props: {
 				Settings
 			</h2>
 			<div className="settings-field">
-				<input
-					id={relativeTimeId}
-					type="checkbox"
-					checked={props.relativeTime}
-					onChange={(e) => props.onRelativeTimeChange(e.target.checked)}
-				/>
-				<label htmlFor={relativeTimeId}>Show relative times</label>
+				{/* Wrapping the input makes the gap between it and the text clickable too. */}
+				<label className="settings-checkbox">
+					<input
+						type="checkbox"
+						checked={props.relativeTime}
+						onChange={(e) => props.onRelativeTimeChange(e.target.checked)}
+					/>
+					Show relative times
+				</label>
 			</div>
 			<div className="settings-field">
 				<label className="field-label" htmlFor={autoRefreshId}>
@@ -55,20 +57,26 @@ export function SettingsDialog(props: {
 					))}
 				</select>
 			</div>
-			<div className="settings-actions">
-				<button
-					type="button"
-					className="button button-secondary"
-					onClick={() => {
-						close();
-						props.onLogout();
-					}}
-				>
-					<span>Log out</span>
-				</button>
-				<button type="button" className="button button-primary" onClick={close}>
-					<span>Close</span>
-				</button>
+			<div className="settings-footer">
+				<p id={logoutHintId} className="muted">
+					Logging out removes the saved token and cached results from this browser.
+				</p>
+				<div className="settings-actions">
+					<button
+						type="button"
+						className="button button-secondary button-danger"
+						aria-describedby={logoutHintId}
+						onClick={() => {
+							close();
+							props.onLogout();
+						}}
+					>
+						<span>Log out</span>
+					</button>
+					<button type="button" className="button button-primary" onClick={close}>
+						<span>Close</span>
+					</button>
+				</div>
 			</div>
 		</dialog>
 	);

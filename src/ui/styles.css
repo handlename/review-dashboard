@@ -26,7 +26,6 @@
 	--rd-font-size-200: 14px;
 	--rd-font-size-300: 16px;
 	--rd-font-size-400: 20px;
-	--rd-font-size-500: 24px;
 	--rd-line-height-tight: 1.25;
 	--rd-line-height-default: 1.5;
 	--rd-font-weight-normal: 400;
@@ -144,6 +143,10 @@ button {
 	border: var(--rd-border-width-thin) solid var(--rd-color-border-control);
 }
 
+.button-danger {
+	color: var(--rd-color-danger-fg);
+}
+
 .button[aria-disabled="true"] {
 	cursor: not-allowed;
 }
@@ -239,8 +242,10 @@ button {
 	border-bottom: 0;
 }
 
-.pr-table tbody tr:hover {
-	background: var(--rd-color-row-hover);
+@media (hover: hover) {
+	.pr-table tbody tr:hover {
+		background: var(--rd-color-row-hover);
+	}
 }
 
 .col-number {
@@ -291,9 +296,19 @@ button {
 	text-decoration: none;
 }
 
-.pr-table a:hover,
+/* A margin instead of a space, so the underline does not run past the title. */
+.external-link-icon {
+	margin-left: var(--rd-space-1);
+}
+
 .pr-table a:focus-visible {
 	text-decoration: underline;
+}
+
+@media (hover: hover) {
+	.pr-table a:hover {
+		text-decoration: underline;
+	}
 }
 
 .diff-additions {
@@ -386,6 +401,7 @@ button {
 
 .review-badges {
 	display: flex;
+	flex-wrap: wrap;
 	gap: var(--rd-space-1);
 	margin: 0;
 	padding: 0;
@@ -410,17 +426,6 @@ button {
 	bottom: -4px;
 	border-radius: var(--rd-radius-full);
 	box-shadow: 0 0 0 2px var(--rd-color-canvas-default);
-}
-
-.review-badge-more {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	width: 20px;
-	height: 20px;
-	border-radius: var(--rd-radius-full);
-	background: var(--rd-color-canvas-subtle);
-	font-size: var(--rd-font-size-100);
 }
 
 .review-icon-approved {
@@ -560,13 +565,23 @@ button {
 	margin-bottom: var(--rd-space-3);
 }
 
+.settings-footer {
+	margin-top: var(--rd-space-5);
+	padding-top: var(--rd-space-4);
+	border-top: var(--rd-border-width-thin) solid var(--rd-color-border-default);
+}
+
+.settings-checkbox {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--rd-space-2);
+}
+
 .settings-actions {
 	display: flex;
 	justify-content: space-between;
 	gap: var(--rd-space-2);
-	margin-top: var(--rd-space-5);
-	padding-top: var(--rd-space-4);
-	border-top: var(--rd-border-width-thin) solid var(--rd-color-border-default);
+	margin-top: var(--rd-space-3);
 }
 
 .token-form {
@@ -575,7 +590,7 @@ button {
 }
 
 .token-heading {
-	font-size: var(--rd-font-size-500);
+	font-size: var(--rd-font-size-300);
 }
 
 .token-note {
@@ -671,6 +686,20 @@ button {
 	animation-name: rd-grow;
 	animation-timing-function: linear;
 	animation-fill-mode: forwards;
+}
+
+/* One class per AUTO_REFRESH_MINUTES value, because the React style prop is not used. */
+.refresh-timer-1m {
+	animation-duration: 60s;
+}
+.refresh-timer-5m {
+	animation-duration: 300s;
+}
+.refresh-timer-10m {
+	animation-duration: 600s;
+}
+.refresh-timer-30m {
+	animation-duration: 1800s;
 }
 
 @keyframes rd-grow {

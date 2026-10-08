@@ -45,6 +45,10 @@ export function formatFileCount(n: number): string {
 	return n === 1 ? "1 file" : `${formatNumber(n)} files`;
 }
 
+export function formatPullRequestCount(n: number): string {
+	return n === 1 ? "1 pull request" : `${formatNumber(n)} pull requests`;
+}
+
 export function formatMinutes(n: number): string {
 	return n === 1 ? "1 minute" : `${formatNumber(n)} minutes`;
 }

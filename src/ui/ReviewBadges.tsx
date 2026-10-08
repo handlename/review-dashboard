@@ -9,8 +9,6 @@ const REVIEW_STATE_LABELS: Record<ReviewState, string> = {
 	DISMISSED: "Dismissed",
 };
 
-const MAX_BADGES = 6;
-
 export function loginOf(actor: Actor | null): string {
 	return actor?.login ?? "ghost";
 }
@@ -61,14 +59,10 @@ export function ReviewBadges(props: { reviews: readonly Review[] }) {
 	const reviews = [...props.reviews].sort(
 		(a, b) => Date.parse(a.submittedAt) - Date.parse(b.submittedAt),
 	);
-	const shown =
-		reviews.length > MAX_BADGES ? reviews.slice(0, MAX_BADGES - 1) : reviews;
-	const hidden = reviews.slice(shown.length);
-	const hiddenLabel = hidden.map(describe).join(", ");
 
 	return (
 		<ul className="review-badges">
-			{shown.map((review, i) => (
+			{reviews.map((review, i) => (
 				<li key={i}>
 					<span
 						className="review-badge"
@@ -81,18 +75,6 @@ export function ReviewBadges(props: { reviews: readonly Review[] }) {
 					</span>
 				</li>
 			))}
-			{hidden.length > 0 && (
-				<li>
-					<span
-						className="review-badge-more"
-						role="img"
-						aria-label={hiddenLabel}
-						title={hiddenLabel}
-					>
-						+{hidden.length}
-					</span>
-				</li>
-			)}
 		</ul>
 	);
 }

@@ -38,16 +38,16 @@ They are declared on `:root` in a single stylesheet bundled at build time.
 | `--rd-color-fg-muted` | #59636e | #9198a1 | Secondary text: login under avatars, file count, group count, helper text, placeholder |
 | `--rd-color-fg-on-emphasis` | #ffffff | #ffffff | Text and glyphs on emphasis fills (primary button, review state icons) |
 | `--rd-color-canvas-default` | #ffffff | #0d1117 | Page background, input background, ring around review state icons |
-| `--rd-color-canvas-subtle` | #f6f8fa | #151b23 | Table header background, secondary button background |
+| `--rd-color-canvas-subtle` | #f6f8fa | #151b23 | Table header background, secondary and danger button background |
 | `--rd-color-canvas-inset` | #eff2f5 | #010409 | Avatar placeholder before the image loads, draft row background |
 | `--rd-color-row-hover` | #f0f3f6 | #1c222b | Table row background on hover |
 | `--rd-color-border-default` | #d1d9e0 | #3d444d | Decorative rules: table row separators, section dividers |
-| `--rd-color-border-control` | #818b98 | #656c76 | Boundaries of inputs, selects, and secondary buttons |
+| `--rd-color-border-control` | #818b98 | #656c76 | Boundaries of inputs, selects, and secondary and danger buttons |
 | `--rd-color-accent-fg` | #0969da | #4493f8 | Links (PR title) |
 | `--rd-color-accent-emphasis` | #0969da | #1f6feb | Primary button background |
 | `--rd-color-success-fg` | #1a7f37 | #3fb950 | Added lines in the diff stat |
 | `--rd-color-success-emphasis` | #1f883d | #238636 | APPROVED icon fill |
-| `--rd-color-danger-fg` | #d1242f | #f85149 | Deleted lines in the diff stat, error text |
+| `--rd-color-danger-fg` | #d1242f | #f85149 | Deleted lines in the diff stat, error text, the danger button label |
 | `--rd-color-danger-emphasis` | #cf222e | #da3633 | CHANGES_REQUESTED icon fill |
 | `--rd-color-neutral-emphasis` | #59636e | #656c76 | COMMENTED and DISMISSED icon fill |
 | `--rd-color-focus` | #0969da | #1f6feb | Focus ring |
@@ -120,14 +120,13 @@ The Label column is the text used in accessible names and tooltips, and matches 
 | `--rd-font-size-200` | 14px |
 | `--rd-font-size-300` | 16px |
 | `--rd-font-size-400` | 20px |
-| `--rd-font-size-500` | 24px |
 | `--rd-line-height-tight` | 1.25 |
 | `--rd-line-height-default` | 1.5 |
 | `--rd-font-weight-normal` | 400 |
 | `--rd-font-weight-semibold` | 600 |
 
 - Body text is `--rd-font-family-sans` at `--rd-font-size-200` with `--rd-line-height-default`
-- The app title (`<h1>`) is `--rd-font-size-400` semibold; group headings (`<h2>`) are `--rd-font-size-300` semibold; the PAT input screen heading (`<h2>`) is `--rd-font-size-500` semibold. Headings use `--rd-line-height-tight`
+- The app title (`<h1>`) is `--rd-font-size-400` semibold; group headings (`<h2>`) are `--rd-font-size-300` semibold; the PAT input screen heading (`<h2>`) is also `--rd-font-size-300` semibold, so no heading is larger than the `<h1>`. Headings use `--rd-line-height-tight`
 - Numeric cells (PR number, diff stat, dates) use `font-variant-numeric: tabular-nums` so digits line up
 - The search query input uses `--rd-font-family-mono`, because the query is GitHub search syntax
 - Only the OS font stacks above are used, following the decision to avoid web fonts and extra assets
@@ -160,7 +159,8 @@ Buttons:
 | Variant | Background | Text | Border | Used for |
 |---|---|---|---|---|
 | Primary | `--rd-color-accent-emphasis` | `--rd-color-fg-on-emphasis` | none | Save, Apply |
-| Secondary | `--rd-color-canvas-subtle` | `--rd-color-fg-default` | `--rd-border-width-thin` `--rd-color-border-control` | Reset, Refresh, Log out, Settings |
+| Secondary | `--rd-color-canvas-subtle` | `--rd-color-fg-default` | `--rd-border-width-thin` `--rd-color-border-control` | Reset, Refresh, Settings, Log out on the PAT input screen |
+| Danger | `--rd-color-canvas-subtle` | `--rd-color-danger-fg` | `--rd-border-width-thin` `--rd-color-border-control` | Log out in SettingsDialog, which removes a working PAT |
 
 - Buttons have `min-height: var(--rd-control-height)`, horizontal padding `--rd-space-3`, `--rd-radius-medium`, and semibold `--rd-font-size-200` text
 - A button with `aria-disabled="true"` keeps its colors and gets `cursor: not-allowed` and 60% opacity on its label only; it stays focusable
@@ -179,7 +179,7 @@ Buttons:
 | Refresh | Circular arrow | Refresh button |
 | Settings | Gear: a ring with eight square teeth and a hole in the center, drawn with strokes | Settings button |
 | Spinner | Three-quarter circle arc that rotates once per second | StatusBar while fetching |
-| External link | Square with an arrow leaving its top-right corner; 12px | After the PR title |
+| External link | Square with an arrow leaving its top-right corner; 12px | After the PR title, separated by a `--rd-space-1` margin instead of a space so the link underline stops at the title |
 | Stack | Three stacked layers: a diamond with two chevrons below it, drawn with strokes; 12px | Stack badge |
 | Warning | Circle with an exclamation mark | Before error messages |
 | Ghost | Head-and-shoulders silhouette inside a circle; drawn at avatar size | Missing or failed avatars |
@@ -243,13 +243,13 @@ Shown when a PAT is saved and the state is not Unauthorized.
 | Search query                                                                                 |  QueryBar, padding space-4 gutter
 | [ is:pr review-requested:@me state:open archived:false         ] [ Apply ] [ Reset ]         |  gap space-2
 +----------------------------------------------------------------------------------------------+
-| Last fetched 2026-09-28 14:05   (spinner) Refreshing...                    [ Refresh ]       |  StatusBar, min-height 40px, fg-muted
+| Last fetched 2026-09-28 14:05   (spinner) Refreshing…                      [ Refresh ]       |  StatusBar, min-height 40px, fg-muted
 |                                                                            ▔▔▔▔▔▔           |  auto refresh bar along the bottom edge of Refresh
 | (!) Could not reach GitHub. Check your connection and press Refresh.                         |  error line, danger-fg
 +----------------------------------------------------------------------------------------------+
 | handlename/review-dashboard (2)                                                              |  GroupSection h2, space-5 above
 | +------+----------------------------------+--------+-----------+----------+---------+-------+|
-| | #    | Title                            | Author | Reviews   | Diff     | Created | Upd.v ||  thead, canvas-subtle; Owner and Repository hidden
+| | #    | Title                            | Author | Reviews   | Diff     | Created | Upd.v ||  thead, canvas-subtle; Organization and Repository hidden
 | +------+----------------------------------+--------+-----------+----------+---------+-------+|
 | | 123  | Fix pagination bug               |  (o)   | (o)A (o)C | +120 -30 | 2026-09-| 2026- ||  row, min-height 48px
 | |      | [ext]                            | alice  |           | 4 files  | 27 10:02| 09-28 ||
@@ -310,7 +310,7 @@ Behavior:
 - In the Unauthorized state, the error line reads "Your token is invalid or expired." and the input has `aria-invalid="true"` (FR-AUTH-3)
 - Log out removes the PAT and the cache (FR-AUTH-2) and shows this screen without the error line and without Log out
 
-Used tokens: `--rd-font-size-500`, `--rd-color-fg-muted`, `--rd-color-danger-fg`, `--rd-color-border-control`, `--rd-control-height`.
+Used tokens: `--rd-font-size-300`, `--rd-color-fg-muted`, `--rd-color-danger-fg`, `--rd-color-border-control`, `--rd-control-height`.
 States: [Unauthorized row](#state-matrix).
 
 ### QueryBar
@@ -361,7 +361,7 @@ The initial sort is Updated, descending.
 |---|---|---|---|---|---|
 | Number | `#123`, `--rd-font-size-100` | Right | 56px | Yes | FR-LIST-1, FR-LIST-8 |
 | Title | PR title link, then the external link icon, then the stack badge | Left | Remaining, at least 160px | Yes | FR-LIST-1, FR-LIST-4, FR-LIST-8, FR-LIST-14 |
-| Owner | Organization login | Left | 96px | Yes | FR-LIST-1, FR-LIST-8 |
+| Organization | Organization login | Left | 96px | Yes | FR-LIST-1, FR-LIST-8 |
 | Repository | Repository name without the owner | Left | 112px | Yes | FR-LIST-1, FR-LIST-8 |
 | Author | See [Author cell](#author-cell) | Left | 88px | Yes (by login) | FR-LIST-1, FR-LIST-8 |
 | Reviews | See [ReviewBadges](#reviewbadges) | Left | 152px | No | FR-LIST-3 |
@@ -378,12 +378,12 @@ Elements:
 - A sortable header contains a `<button>` that fills the cell and has the column name as its text. The active column shows the sort icon after the name, with `aria-hidden="true"`
 - `aria-sort` is set only on the `<th>` of the active sort column (`ascending` or `descending`). Initially the Updated `<th>` has `aria-sort="descending"`
 - The Reviews header is plain text, not a button
-- Body rows have `min-height: 48px`, padding `--rd-space-2`, a bottom rule in `--rd-color-border-default`, and `--rd-color-row-hover` as background on hover
+- Body rows have `min-height: 48px`, padding `--rd-space-2`, a bottom rule in `--rd-color-border-default`, and `--rd-color-row-hover` as background on hover. Hover styles in the table apply only inside `@media (hover: hover)`, so they do not stick after a tap on touch screens
 - The title is `<a href target="_blank" rel="noopener noreferrer">` in `--rd-color-accent-fg`, underlined on hover and focus, followed by the external link icon and visually hidden text "(opens in a new tab)"
 - The link is rendered only when the URL starts with `https://github.com/` ([ARCHITECTURE.md](ARCHITECTURE.md#security)); otherwise the title is plain text
 - Stack badge (FR-LIST-14): for a PR in a stacked PR, the title (link or plain text) is followed by a badge outside the link with the stack icon and `n/m`, in `--rd-color-fg-muted` and `--rd-font-size-100`, with a `--rd-border-width-thin` `--rd-color-border-default` border and `--rd-radius-medium`. The icon and `n/m` are `aria-hidden="true"` and carry `title` "Stack #20: 2 of 3"; the same text follows as visually hidden text "(Stack #20: 2 of 3)"
 - Diff: `+120` in `--rd-color-success-fg`, `-30` in `--rd-color-danger-fg`, and `4 files` in `--rd-color-fg-muted`. The sort key is additions + deletions ([GLOSSARY.md](GLOSSARY.md#diff-stat-diffstat)); the file count does not affect order
-- Columns that repeat the group heading are hidden (FR-LIST-11): Owner when grouping by organization; Owner and Repository when grouping by repository. The Title column takes the freed width
+- Columns that repeat the group heading are hidden (FR-LIST-11): Organization when grouping by organization; Organization and Repository when grouping by repository. The Title column takes the freed width
 - Draft rows (FR-LIST-12): the row has the `pr-draft` class and a `--rd-color-canvas-inset` background (`--rd-color-row-hover` on hover, as for other rows), and its text, title link, and diff numbers are all in `--rd-color-fg-muted`. The title link is always underlined, because its color no longer sets it apart. The title is followed by visually hidden text "(draft)", so the difference is not conveyed by color alone (1.4.1). Avatars and review badges keep their colors
 - Created and Updated are `<time datetime>` elements with the ISO 8601 time. With relative times on (FR-LIST-13), they show the time relative to now in English, such as "5 minutes ago", "yesterday", or "last month", and the absolute date and time in `title`. Times less than a minute old, including times slightly in the future, show "now". The relative times are recomputed every minute. Sorting uses the timestamps, not the displayed text
 
@@ -421,9 +421,9 @@ States: [PR list column](#state-matrix).
 Elements:
 
 - A native `<dialog>` opened as a modal with `showModal()`, labelled by its `<h2>` "Settings" through `aria-labelledby`
-- "Show relative times" checkbox with a `<label for>` (FR-LIST-13)
+- "Show relative times" checkbox wrapped in its `<label>` with a `--rd-space-2` gap, so the gap is part of the click target (FR-LIST-13)
 - "Auto refresh" visible `<label>` and a `<select>` with options Off, 1 minute, 5 minutes, 10 minutes, 30 minutes (FR-CACHE-7)
-- Below a `--rd-color-border-default` rule: Log out (secondary) at the left end and Close (primary) at the right end (FR-AUTH-2)
+- Below a `--rd-color-border-default` rule: the line "Logging out removes the saved token and cached results from this browser." in `--rd-color-fg-muted`, then Log out (danger) at the left end and Close (primary) at the right end (FR-AUTH-2). Log out points at the line with `aria-describedby`
 - `::backdrop` in `--rd-color-backdrop`
 
 Behavior:
@@ -433,7 +433,7 @@ Behavior:
 - Log out closes the dialog, removes the PAT and the cache (FR-AUTH-2), and shows the PAT input screen
 - The settings are kept across reloads and logouts ([ARCHITECTURE.md](ARCHITECTURE.md#persistence))
 
-Used tokens: `--rd-color-canvas-default`, `--rd-color-fg-default`, `--rd-color-border-default`, `--rd-color-backdrop`, `--rd-radius-medium`, `--rd-font-size-300`, `--rd-space-2` to `--rd-space-5`.
+Used tokens: `--rd-color-canvas-default`, `--rd-color-fg-default`, `--rd-color-fg-muted`, `--rd-color-danger-fg`, `--rd-color-border-default`, `--rd-color-backdrop`, `--rd-radius-medium`, `--rd-font-size-300`, `--rd-space-2` to `--rd-space-5`.
 
 ### ReviewBadges
 
@@ -441,14 +441,14 @@ Shows the latest review per reviewer (FR-LIST-3).
 
 Elements:
 
-- `<ul>` with no bullets, laid out in a single row with `--rd-space-1` gap; each item is `<li>`
+- `<ul>` with no bullets, laid out in rows with `--rd-space-1` gap that wrap within the cell; each item is `<li>`
 - Each review badge is `<span role="img" aria-label="carol: Approved" title="carol: Approved">` containing:
   - A 20px round avatar `<img alt="" referrerpolicy="no-referrer">`, with the same placeholder and ghost rules as the [Author cell](#author-cell)
   - The 12px review state icon, overlapping the bottom-right corner of the avatar by 4px, with a 2px ring in `--rd-color-canvas-default`
 - The text in `aria-label` and `title` is `<login>: <Label>` using the Label column of [Review states](#review-states). A null reviewer uses `ghost` as the login
 - Badges are ordered by submitted time ascending
-- Badge centers are 24px apart
-- Up to 6 items are shown. With 7 or more reviews, the first 5 badges are shown and the 6th item is a `+N` badge (N = remaining count): a 20px circle in `--rd-color-canvas-subtle` with `+N` in `--rd-font-size-100`, as `<span role="img">` whose `aria-label` and `title` list every hidden review as `<login>: <Label>` separated by commas
+- Badge centers are 24px apart, horizontally and between wrapped rows
+- Every review is shown as a badge. Badges that do not fit in the column width wrap to the next row, and the row grows taller
 - With no reviews, the cell contains `<span aria-hidden="true">—</span><span class="visually-hidden">No reviews</span>`
 
 Behavior:
@@ -456,7 +456,7 @@ Behavior:
 - Badges are not focusable and not clickable, so they are not pointer targets and 2.5.8 does not apply to them
 - The tooltip is the browser's `title` tooltip
 
-Used tokens: review state colors from [Review states](#review-states), `--rd-color-canvas-default`, `--rd-color-canvas-subtle`, `--rd-color-canvas-inset`, `--rd-radius-full`.
+Used tokens: review state colors from [Review states](#review-states), `--rd-color-canvas-default`, `--rd-color-canvas-inset`, `--rd-radius-full`.
 States: [PR list column](#state-matrix).
 
 ## States
@@ -470,10 +470,10 @@ Rows are the states of `usePullRequests` in [ARCHITECTURE.md](ARCHITECTURE.md#st
 |---|---|---|---|---|
 | Idle | Dashboard | Enabled | Unchanged from the previous render | Nothing rendered. Idle moves to the next state synchronously, so it is never painted |
 | ShowingCache | Dashboard | Enabled | "Last fetched <fetchedAt>" | Cached list |
-| Refreshing | Dashboard | Enabled; Apply aborts the refresh | "Last fetched <fetchedAt>", spinner, "Refreshing..."; Refresh is `aria-disabled`. Status: "Refreshing pull requests" | Cached list is kept (FR-CACHE-3) |
+| Refreshing | Dashboard | Enabled; Apply aborts the refresh | "Last fetched <fetchedAt>", spinner, "Refreshing…"; Refresh is `aria-disabled`. Status: "Refreshing pull requests" | Cached list is kept (FR-CACHE-3) |
 | Ready | Dashboard | Enabled | "Last fetched <fetchedAt>". Status: "Updated. <n> pull requests" | Fetched list |
 | ErrorWithCache | Dashboard | Enabled | "Last fetched <fetchedAt>" and the error line. Alert: the error message | Cached list is kept (FR-ERR-2) |
-| Fetching | Dashboard | Enabled; Apply aborts the fetch | "Not fetched yet", spinner, "Loading..."; Refresh is `aria-disabled`. Status: "Loading pull requests" | "Loading pull requests..." in `--rd-color-fg-muted` |
+| Fetching | Dashboard | Enabled; Apply aborts the fetch | "Not fetched yet", spinner, "Loading…"; Refresh is `aria-disabled`. Status: "Loading pull requests" | "Loading pull requests…" in `--rd-color-fg-muted` |
 | Error | Dashboard | Enabled | "Not fetched yet" and the error line. Alert: the error message | "Could not load pull requests." in `--rd-color-fg-muted` |
 | Unauthorized | PAT input screen with the error line and Log out | Not rendered | Not rendered. Alert: "Your token is invalid or expired." | Not rendered |
 
@@ -483,7 +483,7 @@ Error messages (FR-ERR-1):
 |---|---|
 | Network | "Could not reach GitHub. Check your connection and press Refresh." |
 | RateLimit | "GitHub rate limit reached. Try again later." |
-| Other | "GitHub returned an error: <message from the response>" |
+| Other | "Check the search query and press Refresh. GitHub returned an error: <message from the response>" |
 
 HTTP 401 is not in this table; it leads to Unauthorized.
 
@@ -547,6 +547,7 @@ Numbers:
 
 - Formatted with `Intl.NumberFormat("en-US")`, for example `12,345`
 - Diff stat: `+12,345` and `-1,234`; the file count is `1 file` for one file and `n files` otherwise
+- PR count in the status live region: `1 pull request` for one PR and `n pull requests` otherwise, for example `Updated. 1,000 pull requests`
 - PR number: `#` followed by the number without separators, for example `#12345`, matching GitHub
 
 ## Constraints checklist

@@ -154,6 +154,7 @@ export function StackIcon() {
 export function ExternalLinkIcon() {
 	return (
 		<svg
+			className="external-link-icon"
 			width="12"
 			height="12"
 			viewBox="0 0 12 12"

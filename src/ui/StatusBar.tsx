@@ -17,11 +17,11 @@ function statusView(state: PullRequestsState): StatusView | null {
 		case "Ready":
 			return { cache: state.cache, progress: null, error: null };
 		case "Refreshing":
-			return { cache: state.cache, progress: "Refreshing...", error: null };
+			return { cache: state.cache, progress: "Refreshing…", error: null };
 		case "ErrorWithCache":
 			return { cache: state.cache, progress: null, error: state.error };
 		case "Fetching":
-			return { cache: null, progress: "Loading...", error: null };
+			return { cache: null, progress: "Loading…", error: null };
 		case "Error":
 			return { cache: null, progress: null, error: state.error };
 		default:
@@ -38,7 +38,7 @@ export function errorMessage(error: FetchFailure): string {
 		case "Unauthorized":
 			return "Your token is invalid or expired.";
 		case "Other":
-			return `GitHub returned an error: ${error.message}`;
+			return `Check the search query and press Refresh. GitHub returned an error: ${error.message}`;
 	}
 }
 
@@ -80,8 +80,7 @@ export function StatusBar(props: { state: PullRequestsState; timer: AutoRefreshT
 						{timer !== null && (
 							<span
 								key={timer.key}
-								className="refresh-timer"
-								style={{ animationDuration: `${timer.minutes * 60}s` }}
+								className={`refresh-timer refresh-timer-${timer.minutes}m`}
 								aria-hidden="true"
 							/>
 						)}
