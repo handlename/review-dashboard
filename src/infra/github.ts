@@ -1,7 +1,13 @@
 import type { PullRequest } from "../domain/pullRequest";
 import type { SearchQuery } from "../domain/searchQuery";
 import type { FetchFailure, SearchNode, SearchPage } from "./githubMapper";
-import { nextCursor, toFetchFailure, toPullRequests, toThrownFailure } from "./githubMapper";
+import {
+	isInsufficientScopes,
+	nextCursor,
+	toFetchFailure,
+	toPullRequests,
+	toThrownFailure,
+} from "./githubMapper";
 
 export type SearchResult = {
 	readonly pullRequests: readonly PullRequest[];
@@ -20,7 +26,7 @@ export class FetchError extends Error {
 
 const ENDPOINT = "https://api.github.com/graphql";
 
-const SEARCH_QUERY = `
+const searchQuery = (teamFragment: string) => `
 query SearchPullRequests($query: String!, $after: String) {
   search(query: $query, type: ISSUE, first: 50, after: $after) {
     issueCount
@@ -41,11 +47,22 @@ query SearchPullRequests($query: String!, $after: String) {
         latestReviews(first: 20) {
           nodes { author { login avatarUrl(size: 40) } state submittedAt }
         }
+        reviewRequests(first: 20) {
+          nodes {
+            requestedReviewer {
+              ... on User { login avatarUrl(size: 40) }
+              ${teamFragment}
+            }
+          }
+        }
         stackEntry { position stack { number size } }
       }
     }
   }
 }`;
+
+const SEARCH_QUERY = searchQuery("... on Team { combinedSlug teamAvatarUrl: avatarUrl(size: 40) }");
+const SEARCH_QUERY_WITHOUT_TEAMS = searchQuery("");
 
 function parseJson(text: string): unknown {
 	try {
@@ -60,7 +77,8 @@ async function fetchPage(
 	query: SearchQuery,
 	after: string | null,
 	signal: AbortSignal,
-): Promise<SearchPage> {
+	includeTeams: boolean,
+): Promise<SearchPage | null> {
 	let status: number;
 	let text: string;
 	try {
@@ -71,7 +89,7 @@ async function fetchPage(
 				"Content-Type": "application/json",
 			},
 			body: JSON.stringify({
-				query: SEARCH_QUERY,
+				query: includeTeams ? SEARCH_QUERY : SEARCH_QUERY_WITHOUT_TEAMS,
 				variables: { query, after },
 			}),
 			signal,
@@ -87,6 +105,9 @@ async function fetchPage(
 	}
 
 	const body = parseJson(text);
+	if (includeTeams && status === 200 && isInsufficientScopes(body)) {
+		return null;
+	}
 	const failure = toFetchFailure(status, body);
 	if (failure !== null) {
 		throw new FetchError(failure);
@@ -94,20 +115,34 @@ async function fetchPage(
 	return (body as { data: { search: SearchPage } }).data.search;
 }
 
-export async function searchPullRequests(
+async function fetchAll(
 	token: string,
 	query: SearchQuery,
 	signal: AbortSignal,
-): Promise<SearchResult> {
+	includeTeams: boolean,
+): Promise<SearchResult | null> {
 	const nodes: (SearchNode | null)[] = [];
 	let issueCount = 0;
 	let after: string | null = null;
 	do {
-		const page = await fetchPage(token, query, after, signal);
+		const page = await fetchPage(token, query, after, signal, includeTeams);
+		if (page === null) {
+			return null;
+		}
 		nodes.push(...(page.nodes ?? []));
 		issueCount = page.issueCount;
 		after = nextCursor(page, nodes.length);
 	} while (after !== null);
 
 	return { pullRequests: toPullRequests(nodes), issueCount };
+}
+
+// Team fields need read:org; without it, fetch again without team review requests instead of failing.
+export async function searchPullRequests(
+	token: string,
+	query: SearchQuery,
+	signal: AbortSignal,
+): Promise<SearchResult> {
+	const result = await fetchAll(token, query, signal, true);
+	return result ?? (await fetchAll(token, query, signal, false))!;
 }

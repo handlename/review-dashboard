@@ -17,6 +17,7 @@
 	--rd-color-danger-fg: #d1242f;
 	--rd-color-danger-emphasis: #cf222e;
 	--rd-color-neutral-emphasis: #59636e;
+	--rd-color-attention-emphasis: #9a6700;
 	--rd-color-focus: #0969da;
 	--rd-color-backdrop: #1f232880;
 
@@ -69,6 +70,7 @@
 		--rd-color-danger-fg: #f85149;
 		--rd-color-danger-emphasis: #da3633;
 		--rd-color-neutral-emphasis: #656c76;
+		--rd-color-attention-emphasis: #9e6a03;
 		--rd-color-focus: #1f6feb;
 		--rd-color-backdrop: #010409cc;
 	}
@@ -437,6 +439,9 @@ button {
 .review-icon-commented,
 .review-icon-dismissed {
 	color: var(--rd-color-neutral-emphasis);
+}
+.review-icon-pending {
+	color: var(--rd-color-attention-emphasis);
 }
 
 .review-icon-glyph {

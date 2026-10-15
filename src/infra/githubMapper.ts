@@ -9,6 +9,15 @@ type ReviewNode = {
 	readonly submittedAt: string | null;
 };
 
+// Bots and mannequins match no fragment and arrive as empty objects; teams queried without the Team fragment arrive as null.
+type UserNode = { readonly login: string; readonly avatarUrl: string };
+
+type TeamNode = { readonly combinedSlug: string; readonly teamAvatarUrl: string | null };
+
+type RequestedReviewerNode = UserNode | TeamNode | Record<string, never> | null;
+
+type ReviewRequestNode = { readonly requestedReviewer: RequestedReviewerNode } | null;
+
 type StackEntryNode = {
 	readonly position: number;
 	readonly stack: { readonly number: number; readonly size: number } | null;
@@ -31,6 +40,9 @@ type PullRequestNode = {
 	};
 	readonly latestReviews: {
 		readonly nodes: readonly (ReviewNode | null)[] | null;
+	} | null;
+	readonly reviewRequests: {
+		readonly nodes: readonly ReviewRequestNode[] | null;
 	} | null;
 	readonly stackEntry: StackEntryNode;
 };
@@ -92,6 +104,34 @@ function toReviews(
 	);
 }
 
+function isUserNode(node: RequestedReviewerNode): node is UserNode {
+	return node !== null && "login" in node;
+}
+
+function isTeamNode(node: RequestedReviewerNode): node is TeamNode {
+	return node !== null && "combinedSlug" in node;
+}
+
+function toRequestedReviewer(node: RequestedReviewerNode): Actor | null {
+	if (isUserNode(node)) {
+		return toActor(node);
+	}
+	if (isTeamNode(node)) {
+		return {
+			login: node.combinedSlug,
+			avatarUrl: node.teamAvatarUrl === null ? null : toAvatarUrl(node.teamAvatarUrl),
+		};
+	}
+	return null;
+}
+
+function toReviewRequests(nodes: readonly ReviewRequestNode[] | null): readonly Actor[] {
+	return (nodes ?? []).flatMap((node) => {
+		const actor = node === null ? null : toRequestedReviewer(node.requestedReviewer);
+		return actor === null ? [] : [actor];
+	});
+}
+
 function toStack(node: StackEntryNode): StackPosition | null {
 	return node === null || node.stack === null
 		? null
@@ -119,6 +159,7 @@ export function toPullRequests(
 		createdAt: node.createdAt,
 		updatedAt: node.updatedAt,
 		latestReviews: toReviews(node.latestReviews?.nodes ?? null),
+		reviewRequests: toReviewRequests(node.reviewRequests?.nodes ?? null),
 		stack: toStack(node.stackEntry),
 	}));
 }
@@ -175,6 +216,18 @@ export function toFetchFailure(
 		};
 	}
 	return { kind: "Other", message: "Unexpected response" };
+}
+
+// Team fields without read:org fail the whole query with no data.
+export function isInsufficientScopes(body: unknown): boolean {
+	if (!isObject(body) || (isObject(body.data) && isObject(body.data.search))) {
+		return false;
+	}
+	const errors = Array.isArray(body.errors) ? body.errors.filter(isObject) : [];
+	return (
+		errors.some((e) => e.type === "INSUFFICIENT_SCOPES") &&
+		!errors.some((e) => e.type === "RATE_LIMITED")
+	);
 }
 
 export function toThrownFailure(error: unknown): FetchFailure | null {

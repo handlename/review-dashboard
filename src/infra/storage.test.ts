@@ -143,6 +143,7 @@ describe("storage: cache", () => {
 					{ reviewer: { login: "carol", avatarUrl: null }, state: "APPROVED", submittedAt: "2026-09-28T00:00:00Z" },
 					{ reviewer: null, state: "DISMISSED", submittedAt: "2026-09-28T01:00:00Z" },
 				],
+				reviewRequests: [{ login: "acme/web-team", avatarUrl: null }],
 				stack: null,
 			},
 		],
@@ -229,6 +230,17 @@ describe("storage: cache", () => {
 	it("loadCache returns null when a pull request lacks stack (old format)", () => {
 		const { stack: _, ...old } = pr;
 		store({ ...cache, pullRequests: [old] });
+		expect(loadCache(query)).toBeNull();
+	});
+
+	it("loadCache returns null when a pull request lacks reviewRequests (old format)", () => {
+		const { reviewRequests: _, ...old } = pr;
+		store({ ...cache, pullRequests: [old] });
+		expect(loadCache(query)).toBeNull();
+	});
+
+	it("loadCache returns null when a review request is not an actor", () => {
+		store({ ...cache, pullRequests: [{ ...pr, reviewRequests: [{ avatarUrl: null }] }] });
 		expect(loadCache(query)).toBeNull();
 	});
 

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { Actor, Review, ReviewState } from "../domain/pullRequest";
-import { GhostIcon, ReviewStateIcon } from "./icons";
+import { respondedReviews } from "../domain/pullRequest";
+import { GhostIcon, PendingIcon, ReviewStateIcon } from "./icons";
 
 const REVIEW_STATE_LABELS: Record<ReviewState, string> = {
 	APPROVED: "Approved",
@@ -43,11 +44,16 @@ export function Avatar(props: { actor: Actor | null }) {
 	return url === null ? <GhostIcon /> : <AvatarImage key={url} url={url} />;
 }
 
+const describeRequest = (actor: Actor) => `${actor.login}: Pending`;
+
 const describe = (review: Review) =>
 	`${loginOf(review.reviewer)}: ${REVIEW_STATE_LABELS[review.state]}`;
 
-export function ReviewBadges(props: { reviews: readonly Review[] }) {
-	if (props.reviews.length === 0) {
+export function ReviewBadges(props: {
+	reviews: readonly Review[];
+	reviewRequests: readonly Actor[];
+}) {
+	if (props.reviews.length === 0 && props.reviewRequests.length === 0) {
 		return (
 			<>
 				<span aria-hidden="true">—</span>
@@ -56,9 +62,7 @@ export function ReviewBadges(props: { reviews: readonly Review[] }) {
 		);
 	}
 
-	const reviews = [...props.reviews].sort(
-		(a, b) => Date.parse(a.submittedAt) - Date.parse(b.submittedAt),
-	);
+	const reviews = respondedReviews(props.reviews, props.reviewRequests);
 
 	return (
 		<ul className="review-badges">
@@ -72,6 +76,19 @@ export function ReviewBadges(props: { reviews: readonly Review[] }) {
 					>
 						<Avatar actor={review.reviewer} />
 						<ReviewStateIcon state={review.state} />
+					</span>
+				</li>
+			))}
+			{props.reviewRequests.map((actor) => (
+				<li key={`request:${actor.login}`}>
+					<span
+						className="review-badge"
+						role="img"
+						aria-label={describeRequest(actor)}
+						title={describeRequest(actor)}
+					>
+						<Avatar actor={actor} />
+						<PendingIcon />
 					</span>
 				</li>
 			))}
