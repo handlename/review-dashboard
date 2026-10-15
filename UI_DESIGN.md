@@ -50,6 +50,7 @@ They are declared on `:root` in a single stylesheet bundled at build time.
 | `--rd-color-danger-fg` | #d1242f | #f85149 | Deleted lines in the diff stat, error text, the danger button label |
 | `--rd-color-danger-emphasis` | #cf222e | #da3633 | CHANGES_REQUESTED icon fill |
 | `--rd-color-neutral-emphasis` | #59636e | #656c76 | COMMENTED and DISMISSED icon fill |
+| `--rd-color-attention-emphasis` | #9a6700 | #9e6a03 | Pending (review request) icon fill |
 | `--rd-color-focus` | #0969da | #1f6feb | Focus ring |
 | `--rd-color-backdrop` | #1f232880 | #010409cc | Backdrop behind the settings dialog (translucent; no contrast requirement) |
 
@@ -82,12 +83,15 @@ Decorative rules are not required to meet a threshold.
 | `--rd-color-fg-on-emphasis` | `--rd-color-success-emphasis` | 4.51 | 4.63 | 3 |
 | `--rd-color-fg-on-emphasis` | `--rd-color-danger-emphasis` | 5.35 | 4.60 | 3 |
 | `--rd-color-fg-on-emphasis` | `--rd-color-neutral-emphasis` | 6.11 | 5.30 | 3 |
+| `--rd-color-fg-on-emphasis` | `--rd-color-attention-emphasis` | 4.87 | 4.65 | 3 |
 | `--rd-color-success-emphasis` | `--rd-color-canvas-default` | 4.51 | 4.08 | 3 |
 | `--rd-color-success-emphasis` | `--rd-color-row-hover` | 4.05 | 3.45 | 3 |
 | `--rd-color-danger-emphasis` | `--rd-color-canvas-default` | 5.35 | 4.10 | 3 |
 | `--rd-color-danger-emphasis` | `--rd-color-row-hover` | 4.80 | 3.47 | 3 |
 | `--rd-color-neutral-emphasis` | `--rd-color-canvas-default` | 6.11 | 3.56 | 3 |
 | `--rd-color-neutral-emphasis` | `--rd-color-row-hover` | 5.48 | 3.01 | 3 |
+| `--rd-color-attention-emphasis` | `--rd-color-canvas-default` | 4.87 | 4.07 | 3 |
+| `--rd-color-attention-emphasis` | `--rd-color-row-hover` | 4.37 | 3.44 | 3 |
 | `--rd-color-focus` | `--rd-color-canvas-default` | 5.19 | 4.08 | 3 |
 | `--rd-color-focus` | `--rd-color-canvas-subtle` | 4.87 | 3.73 | 3 |
 | `--rd-color-focus` | `--rd-color-row-hover` | 4.66 | 3.45 | 3 |
@@ -107,6 +111,7 @@ States are told apart by glyph shape, not by color alone (1.4.1); COMMENTED and 
 | CHANGES_REQUESTED | Horizontal bar (minus) | `--rd-color-danger-emphasis` | Changes requested |
 | COMMENTED | Speech bubble | `--rd-color-neutral-emphasis` | Commented |
 | DISMISSED | Circle with a diagonal slash | `--rd-color-neutral-emphasis` | Dismissed |
+| Pending (review request) | Dot in the center | `--rd-color-attention-emphasis` | Pending |
 
 The Label column is the text used in accessible names and tooltips, and matches [GLOSSARY.md](GLOSSARY.md#review-result-reviewstate).
 
@@ -437,19 +442,20 @@ Used tokens: `--rd-color-canvas-default`, `--rd-color-fg-default`, `--rd-color-f
 
 ### ReviewBadges
 
-Shows the latest review per reviewer (FR-LIST-3).
+Shows the latest review per reviewer, then the pending review requests (FR-LIST-3).
 
 Elements:
 
 - `<ul>` with no bullets, laid out in rows with `--rd-space-1` gap that wrap within the cell; each item is `<li>`
-- Each review badge is `<span role="img" aria-label="carol: Approved" title="carol: Approved">` containing:
+- Each review badge is `<span role="img" aria-label="carol: Approved" title="carol: Approved">` containing (a review request uses the Pending icon, e.g. `aria-label="acme/web: Pending"`):
   - A 20px round avatar `<img alt="" referrerpolicy="no-referrer">`, with the same placeholder and ghost rules as the [Author cell](#author-cell)
   - The 12px review state icon, overlapping the bottom-right corner of the avatar by 4px, with a 2px ring in `--rd-color-canvas-default`
 - The text in `aria-label` and `title` is `<login>: <Label>` using the Label column of [Review states](#review-states). A null reviewer uses `ghost` as the login
-- Badges are ordered by submitted time ascending
+- Reviews are ordered by submitted time ascending, followed by review requests in GitHub's order
+- A reviewer who also has a review request is shown only as Pending
 - Badge centers are 24px apart, horizontally and between wrapped rows
 - Every review is shown as a badge. Badges that do not fit in the column width wrap to the next row, and the row grows taller
-- With no reviews, the cell contains `<span aria-hidden="true">—</span><span class="visually-hidden">No reviews</span>`
+- With no reviews and no review requests, the cell contains `<span aria-hidden="true">—</span><span class="visually-hidden">No reviews</span>`
 
 Behavior:
 
