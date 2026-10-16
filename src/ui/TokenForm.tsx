@@ -83,7 +83,8 @@ export function TokenForm(props: {
 			</form>
 			<div className="muted token-permissions">
 				<p>
-					Classic token: grant the repo scope to include private repositories.
+					Classic token: grant the repo scope to include private repositories,
+					and read:org to show review requests to teams.
 				</p>
 				<p>
 					Fine-grained token: can access only one resource owner, so searches

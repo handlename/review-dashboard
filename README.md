@@ -26,7 +26,7 @@ It runs entirely in the browser as a static site hosted on GitHub Pages, and tal
 
 ### Token permissions
 
-- **Classic PAT**: grant the `repo` scope to include private repositories
+- **Classic PAT**: grant the `repo` scope to include private repositories, and `read:org` to show review requests to teams (without it, everything else still works)
 - **Fine-grained PAT**: works, but can access only one resource owner, so searches across multiple organizations return incomplete results
 
 ## Documentation

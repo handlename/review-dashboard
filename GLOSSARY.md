@@ -65,7 +65,8 @@ The list shows the position and size as `n/m` after the title, using GitHub's va
 
 ### Actor (Actor)
 
-A GitHub user as shown in the app: a login and an avatar URL.
+A GitHub user, or a team in a review request, as shown in the app: a login and an avatar URL.
+A team's login is `org/team-slug`.
 The avatar URL is absent unless it points to `avatars.githubusercontent.com`; the UI then shows a ghost.
 
 ### Author (author)
@@ -88,7 +89,7 @@ It has a reviewer, a review result, and a submission time.
 
 A GitHub user who has submitted a review on the PR, as an actor (login and avatar).
 It may be absent if the user account has been deleted.
-Users and teams whose review was requested but who have not yet submitted a review are not treated as reviewers.
+Users and teams whose review was requested but who have not yet submitted a review are not treated as reviewers; they are review requests.
 
 ### Review result (ReviewState)
 
@@ -105,7 +106,14 @@ The app shows the following four values. (FR-LIST-3)
 ### Latest review (latestReview)
 
 The review each reviewer submitted most recently.
-A PR's review status is represented as its list of latest reviews, one per reviewer. (FR-LIST-3)
+A PR's review status is represented as its list of latest reviews, one per reviewer, and its review requests. (FR-LIST-3)
+
+### Review request (reviewRequests)
+
+A user or team whose review is requested on the PR and who has not yet responded, as an actor.
+It is shown with the label "Pending".
+When a reviewer is requested again after reviewing, only the review request is shown and their latest review is hidden.
+Team requests are omitted when the PAT cannot read teams (no `read:org`). (FR-LIST-3)
 
 ## List view
 
@@ -164,8 +172,8 @@ It follows the OS setting (`prefers-color-scheme`); there is no manual switch.
 
 ### Review badge
 
-The mark for one latest review: the reviewer's avatar with a review state icon over its corner.
-The reviewer and the review result are given in its tooltip and accessible name. (FR-LIST-3)
+The mark for one latest review or review request: the actor's avatar with a review state icon over its corner.
+The actor and the review result (or "Pending" for a review request) are given in its tooltip and accessible name. (FR-LIST-3)
 
 ### State matrix
 

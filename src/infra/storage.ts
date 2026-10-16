@@ -98,6 +98,8 @@ function isPullRequest(value: unknown): value is PullRequest {
 		isString(value.updatedAt) &&
 		Array.isArray(value.latestReviews) &&
 		value.latestReviews.every(isReview) &&
+		Array.isArray(value.reviewRequests) &&
+		value.reviewRequests.every(isActor) &&
 		(value.stack === null || isStackPosition(value.stack))
 	);
 }
