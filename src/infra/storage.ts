@@ -98,7 +98,8 @@ function isPullRequest(value: unknown): value is PullRequest {
 		isString(value.updatedAt) &&
 		Array.isArray(value.latestReviews) &&
 		value.latestReviews.every(isReview) &&
-		(value.stack === null || isStackPosition(value.stack))
+		(value.stack === null || isStackPosition(value.stack)) &&
+		(value.ciStatus === null || isOneOf(value.ciStatus, ["PASSED", "FAILED", "RUNNING"]))
 	);
 }
 

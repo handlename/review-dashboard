@@ -1,4 +1,4 @@
-import type { ReviewState } from "../domain/pullRequest";
+import type { CiStatus, ReviewState } from "../domain/pullRequest";
 import type { SortDirection } from "../domain/viewSettings";
 
 const REVIEW_STATE_CLASS: Record<ReviewState, string> = {
@@ -60,6 +60,58 @@ export function ReviewStateIcon(props: { state: ReviewState }) {
 			<circle cx="6" cy="6" r="6" />
 			<g className="review-icon-glyph">
 				<ReviewStateGlyph state={props.state} />
+			</g>
+		</svg>
+	);
+}
+
+const CI_STATUS_CLASS: Record<CiStatus, string> = {
+	PASSED: "ci-icon-passed",
+	FAILED: "ci-icon-failed",
+	RUNNING: "ci-icon-running",
+};
+
+function CiStatusGlyph(props: { status: CiStatus }) {
+	switch (props.status) {
+		case "PASSED":
+			return (
+				<path
+					d="M3.5 6.2 5.2 7.9 8.6 4.3"
+					fill="none"
+					strokeWidth="1.5"
+					strokeLinecap="round"
+					strokeLinejoin="round"
+				/>
+			);
+		case "FAILED":
+			return (
+				<path
+					d="M4.2 4.2 7.8 7.8M7.8 4.2 4.2 7.8"
+					fill="none"
+					strokeWidth="1.5"
+					strokeLinecap="round"
+					strokeLinejoin="round"
+				/>
+			);
+		case "RUNNING":
+			return <circle cx="6" cy="6" r="2" stroke="none" />;
+	}
+}
+
+// Drawn on the same 12-unit grid as ReviewStateIcon, shown at 16px because it stands alone in its cell.
+export function CiStatusIcon(props: { status: CiStatus }) {
+	return (
+		<svg
+			className={`ci-icon ${CI_STATUS_CLASS[props.status]}`}
+			width="16"
+			height="16"
+			viewBox="0 0 12 12"
+			fill="currentColor"
+			aria-hidden="true"
+		>
+			<circle cx="6" cy="6" r="6" />
+			<g className="ci-icon-glyph">
+				<CiStatusGlyph status={props.status} />
 			</g>
 		</svg>
 	);

@@ -30,6 +30,9 @@ export type StackPosition = {
 	readonly size: number;
 };
 
+// Aggregate result of all checks on the latest commit.
+export type CiStatus = "PASSED" | "FAILED" | "RUNNING";
+
 export type PullRequest = {
 	readonly number: number;
 	readonly title: string;
@@ -43,4 +46,5 @@ export type PullRequest = {
 	readonly updatedAt: string;
 	readonly latestReviews: readonly Review[];
 	readonly stack: StackPosition | null;
+	readonly ciStatus: CiStatus | null;
 };

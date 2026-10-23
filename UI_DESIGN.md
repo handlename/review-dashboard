@@ -36,7 +36,7 @@ They are declared on `:root` in a single stylesheet bundled at build time.
 |---|---|---|---|
 | `--rd-color-fg-default` | #1f2328 | #e6edf3 | Body text, table cells, headings |
 | `--rd-color-fg-muted` | #59636e | #9198a1 | Secondary text: login under avatars, file count, group count, helper text, placeholder |
-| `--rd-color-fg-on-emphasis` | #ffffff | #ffffff | Text and glyphs on emphasis fills (primary button, review state icons) |
+| `--rd-color-fg-on-emphasis` | #ffffff | #ffffff | Text and glyphs on emphasis fills (primary button, review state icons, CI icons) |
 | `--rd-color-canvas-default` | #ffffff | #0d1117 | Page background, input background, ring around review state icons |
 | `--rd-color-canvas-subtle` | #f6f8fa | #151b23 | Table header background, secondary and danger button background |
 | `--rd-color-canvas-inset` | #eff2f5 | #010409 | Avatar placeholder before the image loads, draft row background |
@@ -46,10 +46,11 @@ They are declared on `:root` in a single stylesheet bundled at build time.
 | `--rd-color-accent-fg` | #0969da | #4493f8 | Links (PR title) |
 | `--rd-color-accent-emphasis` | #0969da | #1f6feb | Primary button background |
 | `--rd-color-success-fg` | #1a7f37 | #3fb950 | Added lines in the diff stat |
-| `--rd-color-success-emphasis` | #1f883d | #238636 | APPROVED icon fill |
+| `--rd-color-success-emphasis` | #1f883d | #238636 | APPROVED and Passed CI icon fill |
 | `--rd-color-danger-fg` | #d1242f | #f85149 | Deleted lines in the diff stat, error text, the danger button label |
-| `--rd-color-danger-emphasis` | #cf222e | #da3633 | CHANGES_REQUESTED icon fill |
+| `--rd-color-danger-emphasis` | #cf222e | #da3633 | CHANGES_REQUESTED and Failed CI icon fill |
 | `--rd-color-neutral-emphasis` | #59636e | #656c76 | COMMENTED and DISMISSED icon fill |
+| `--rd-color-attention-emphasis` | #9a6700 | #9e6a03 | Running CI icon fill |
 | `--rd-color-focus` | #0969da | #1f6feb | Focus ring |
 | `--rd-color-backdrop` | #1f232880 | #010409cc | Backdrop behind the settings dialog (translucent; no contrast requirement) |
 
@@ -82,12 +83,18 @@ Decorative rules are not required to meet a threshold.
 | `--rd-color-fg-on-emphasis` | `--rd-color-success-emphasis` | 4.51 | 4.63 | 3 |
 | `--rd-color-fg-on-emphasis` | `--rd-color-danger-emphasis` | 5.35 | 4.60 | 3 |
 | `--rd-color-fg-on-emphasis` | `--rd-color-neutral-emphasis` | 6.11 | 5.30 | 3 |
+| `--rd-color-fg-on-emphasis` | `--rd-color-attention-emphasis` | 4.86 | 4.64 | 3 |
 | `--rd-color-success-emphasis` | `--rd-color-canvas-default` | 4.51 | 4.08 | 3 |
 | `--rd-color-success-emphasis` | `--rd-color-row-hover` | 4.05 | 3.45 | 3 |
+| `--rd-color-success-emphasis` | `--rd-color-canvas-inset` | 4.02 | 4.43 | 3 |
 | `--rd-color-danger-emphasis` | `--rd-color-canvas-default` | 5.35 | 4.10 | 3 |
 | `--rd-color-danger-emphasis` | `--rd-color-row-hover` | 4.80 | 3.47 | 3 |
+| `--rd-color-danger-emphasis` | `--rd-color-canvas-inset` | 4.76 | 4.45 | 3 |
 | `--rd-color-neutral-emphasis` | `--rd-color-canvas-default` | 6.11 | 3.56 | 3 |
 | `--rd-color-neutral-emphasis` | `--rd-color-row-hover` | 5.48 | 3.01 | 3 |
+| `--rd-color-attention-emphasis` | `--rd-color-canvas-default` | 4.86 | 4.07 | 3 |
+| `--rd-color-attention-emphasis` | `--rd-color-row-hover` | 4.37 | 3.43 | 3 |
+| `--rd-color-attention-emphasis` | `--rd-color-canvas-inset` | 4.33 | 4.41 | 3 |
 | `--rd-color-focus` | `--rd-color-canvas-default` | 5.19 | 4.08 | 3 |
 | `--rd-color-focus` | `--rd-color-canvas-subtle` | 4.87 | 3.73 | 3 |
 | `--rd-color-focus` | `--rd-color-row-hover` | 4.66 | 3.45 | 3 |
@@ -109,6 +116,21 @@ States are told apart by glyph shape, not by color alone (1.4.1); COMMENTED and 
 | DISMISSED | Circle with a diagonal slash | `--rd-color-neutral-emphasis` | Dismissed |
 
 The Label column is the text used in accessible names and tooltips, and matches [GLOSSARY.md](GLOSSARY.md#review-result-reviewstate).
+
+### CI states
+
+Each CI status (CiStatus) is shown as a 16px icon: a filled circle in the state's emphasis color with a glyph drawn in `--rd-color-fg-on-emphasis`.
+The icon is drawn on a 12-unit viewBox shared with the review state icons, so the glyph geometry is the same; it is 16px because it stands alone in its cell instead of sitting on the corner of an avatar.
+States are told apart by glyph shape, not by color alone (1.4.1).
+
+| State | Shape | Color | Label |
+|---|---|---|---|
+| PASSED | Check mark | `--rd-color-success-emphasis` | CI: Passed |
+| FAILED | Cross (×) | `--rd-color-danger-emphasis` | CI: Failed |
+| RUNNING | Small solid dot in the center | `--rd-color-attention-emphasis` | CI: Running |
+
+The Label column is the text used in accessible names and tooltips, and the states match [GLOSSARY.md](GLOSSARY.md#ci-status-cistatus).
+The icons have no `--rd-color-canvas-default` ring, so they sit directly on the row background; the [Contrast](#contrast) table includes the hover and draft row backgrounds.
 
 ### Typography
 
@@ -174,6 +196,7 @@ Buttons:
 | Icon | Shape | Where |
 |---|---|---|
 | Review state | See [Review states](#review-states); 12px | ReviewBadges |
+| CI status | See [CI states](#ci-states); 16px, drawn on a 12-unit viewBox | CI column |
 | Sort ascending | Upward triangle | Active sort column header |
 | Sort descending | Downward triangle | Active sort column header |
 | Refresh | Circular arrow | Refresh button |
@@ -192,9 +215,9 @@ Buttons:
 |---|---|---|
 | `--rd-layout-max-width` | 1280px | Maximum width of the page content |
 | `--rd-layout-gutter` | 24px | Left and right page padding |
-| `--rd-table-min-width` | 1024px | Minimum width of the PR table |
+| `--rd-table-min-width` | 1064px | Minimum width of the PR table |
 
-- The layout is designed for viewports 1024px wide or more. At 1024px the content is 976px wide, so the ungrouped table scrolls by 48px; grouped tables hide columns and fit
+- The layout is designed for viewports 1024px wide or more. The minimum width applies to every table, grouped or not, so at a 1024px viewport (content 976px wide, 974px inside the wrapper border) every table scrolls by about 90px. When grouped, the hidden columns' width goes to Title
 - Only the PR table has a minimum width: `<table>` gets `min-width: var(--rd-table-min-width)` and its wrapper gets `overflow-x: auto`, so narrow viewports scroll the table horizontally. A data table is an exception in 1.4.10 Reflow
 - Everything outside the table (header, QueryBar, StatusBar, PAT input screen) uses `flex-wrap: wrap` and stays usable without horizontal scrolling down to a 320px viewport (1.4.10)
 - No element is sticky or fixed
@@ -248,17 +271,17 @@ Shown when a PAT is saved and the state is not Unauthorized.
 | (!) Could not reach GitHub. Check your connection and press Refresh.                         |  error line, danger-fg
 +----------------------------------------------------------------------------------------------+
 | handlename/review-dashboard (2)                                                              |  GroupSection h2, space-5 above
-| +------+----------------------------------+--------+-----------+----------+---------+-------+|
-| | #    | Title                            | Author | Reviews   | Diff     | Created | Upd.v ||  thead, canvas-subtle; Organization and Repository hidden
-| +------+----------------------------------+--------+-----------+----------+---------+-------+|
-| | 123  | Fix pagination bug               |  (o)   | (o)A (o)C | +120 -30 | 2026-09-| 2026- ||  row, min-height 48px
-| |      | [ext]                            | alice  |           | 4 files  | 27 10:02| 09-28 ||
-| +------+----------------------------------+--------+-----------+----------+---------+-------+|
+| +------+-----------------------------+--------+-----------+----+----------+---------+-------+|
+| | #    | Title                       | Author | Reviews   | CI | Diff     | Created | Upd.v ||  thead, canvas-subtle; Organization and Repository hidden
+| +------+-----------------------------+--------+-----------+----+----------+---------+-------+|
+| | 123  | Fix pagination bug          |  (o)   | (o)A (o)C | (c)| +120 -30 | 2026-09-| 2026- ||  row, min-height 48px
+| |      | [ext]                       | alice  |           |    | 4 files  | 27 10:02| 09-28 ||
+| +------+-----------------------------+--------+-----------+----+----------+---------+-------+|
 +----------------------------------------------------------------------------------------------+
 ```
 
 - The drawing shows the in-progress indicator and the error line together only to place every element; which of them appear in each state is fixed in [States](#states)
-- In the drawing, `(o)` is an avatar and the letter after it stands for the review state icon; `Upd.v` is the Updated column with the descending sort icon
+- In the drawing, `(o)` is an avatar and the letter after it stands for the review state icon; `(c)` is the CI status icon; `Upd.v` is the Updated column with the descending sort icon
 - The header, QueryBar, and StatusBar span the content width; the PR table sits in a scroll wrapper below them
 - When grouping is `none`, the table appears directly below the StatusBar without a group heading
 
@@ -365,6 +388,7 @@ The initial sort is Updated, descending.
 | Repository | Repository name without the owner | Left | 112px | Yes | FR-LIST-1, FR-LIST-8 |
 | Author | See [Author cell](#author-cell) | Left | 88px | Yes (by login) | FR-LIST-1, FR-LIST-8 |
 | Reviews | See [ReviewBadges](#reviewbadges) | Left | 152px | No | FR-LIST-3 |
+| CI | See [CI states](#ci-states); empty when the PR has no checks | Center | 40px | No | FR-LIST-15 |
 | Diff | `+adds` and `-dels` on line 1, `n files` on line 2, `--rd-font-size-100` | Right | 120px | Yes (adds + dels) | FR-LIST-1, FR-LIST-2, FR-LIST-8 |
 | Created | Date and time, or relative time; `--rd-font-size-100` | Right | 120px | Yes | FR-LIST-1, FR-LIST-8, FR-LIST-13 |
 | Updated | Date and time, or relative time; `--rd-font-size-100` | Right | 120px | Yes | FR-LIST-1, FR-LIST-8, FR-LIST-13 |
@@ -377,14 +401,14 @@ Elements:
 - `<thead>` cells are `<th scope="col">` on `--rd-color-canvas-subtle`, semibold `--rd-font-size-100`
 - A sortable header contains a `<button>` that fills the cell and has the column name as its text. The active column shows the sort icon after the name, with `aria-hidden="true"`
 - `aria-sort` is set only on the `<th>` of the active sort column (`ascending` or `descending`). Initially the Updated `<th>` has `aria-sort="descending"`
-- The Reviews header is plain text, not a button
+- The Reviews and CI headers are plain text, not buttons
 - Body rows have `min-height: 48px`, padding `--rd-space-2`, a bottom rule in `--rd-color-border-default`, and `--rd-color-row-hover` as background on hover. Hover styles in the table apply only inside `@media (hover: hover)`, so they do not stick after a tap on touch screens
 - The title is `<a href target="_blank" rel="noopener noreferrer">` in `--rd-color-accent-fg`, underlined on hover and focus, followed by the external link icon and visually hidden text "(opens in a new tab)"
 - The link is rendered only when the URL starts with `https://github.com/` ([ARCHITECTURE.md](ARCHITECTURE.md#security)); otherwise the title is plain text
 - Stack badge (FR-LIST-14): for a PR in a stacked PR, the title (link or plain text) is followed by a badge outside the link with the stack icon and `n/m`, in `--rd-color-fg-muted` and `--rd-font-size-100`, with a `--rd-border-width-thin` `--rd-color-border-default` border and `--rd-radius-medium`. The icon and `n/m` are `aria-hidden="true"` and carry `title` "Stack #20: 2 of 3"; the same text follows as visually hidden text "(Stack #20: 2 of 3)"
 - Diff: `+120` in `--rd-color-success-fg`, `-30` in `--rd-color-danger-fg`, and `4 files` in `--rd-color-fg-muted`. The sort key is additions + deletions ([GLOSSARY.md](GLOSSARY.md#diff-stat-diffstat)); the file count does not affect order
 - Columns that repeat the group heading are hidden (FR-LIST-11): Organization when grouping by organization; Organization and Repository when grouping by repository. The Title column takes the freed width
-- Draft rows (FR-LIST-12): the row has the `pr-draft` class and a `--rd-color-canvas-inset` background (`--rd-color-row-hover` on hover, as for other rows), and its text, title link, and diff numbers are all in `--rd-color-fg-muted`. The title link is always underlined, because its color no longer sets it apart. The title is followed by visually hidden text "(draft)", so the difference is not conveyed by color alone (1.4.1). Avatars and review badges keep their colors
+- Draft rows (FR-LIST-12): the row has the `pr-draft` class and a `--rd-color-canvas-inset` background (`--rd-color-row-hover` on hover, as for other rows), and its text, title link, and diff numbers are all in `--rd-color-fg-muted`. The title link is always underlined, because its color no longer sets it apart. The title is followed by visually hidden text "(draft)", so the difference is not conveyed by color alone (1.4.1). Avatars, review badges, and CI icons keep their colors
 - Created and Updated are `<time datetime>` elements with the ISO 8601 time. With relative times on (FR-LIST-13), they show the time relative to now in English, such as "5 minutes ago", "yesterday", or "last month", and the absolute date and time in `title`. Times less than a minute old, including times slightly in the future, show "now". The relative times are recomputed every minute. Sorting uses the timestamps, not the displayed text
 
 Target size: every button in this table and in the header, QueryBar, StatusBar, and PAT input screen is at least 24px by 24px (2.5.8); `--rd-control-height` makes buttons 32px tall, and header sort buttons fill a cell at least 32px tall.
@@ -396,7 +420,7 @@ Target size: every button in this table and in the header, QueryBar, StatusBar, 
 - The ghost icon replaces the image when the author is null, the avatar URL is null, or the image fails to load (`onError`)
 - When the author is null, the login text is `ghost`
 
-Used tokens: `--rd-color-canvas-subtle`, `--rd-color-row-hover`, `--rd-color-border-default`, `--rd-color-accent-fg`, `--rd-color-success-fg`, `--rd-color-danger-fg`, `--rd-color-fg-muted`, `--rd-table-min-width`, `--rd-control-height`.
+Used tokens: `--rd-color-canvas-subtle`, `--rd-color-row-hover`, `--rd-color-border-default`, `--rd-color-accent-fg`, `--rd-color-success-fg`, `--rd-color-danger-fg`, `--rd-color-success-emphasis`, `--rd-color-danger-emphasis`, `--rd-color-attention-emphasis`, `--rd-color-fg-muted`, `--rd-table-min-width`, `--rd-control-height`.
 States: [PR list column](#state-matrix).
 
 ### GroupSection
@@ -511,15 +535,15 @@ The ring is drawn with `outline`, never `box-shadow`, so it stays visible in for
 
 | Criterion | Where | How |
 |---|---|---|
-| 1.1.1 Non-text Content | Avatars, review badges, icons | Avatars have `alt=""`; badges carry names through `role="img"` and `aria-label`; decorative icons are `aria-hidden="true"`; the stack badge hides its icon and `n/m` and carries hidden "(Stack #20: 2 of 3)" text instead |
+| 1.1.1 Non-text Content | Avatars, review badges, icons | Avatars have `alt=""`; badges and CI icons carry names through `role="img"` and `aria-label`; decorative icons are `aria-hidden="true"`; the stack badge hides its icon and `n/m` and carries hidden "(Stack #20: 2 of 3)" text instead |
 | 1.3.1 Info and Relationships | Tables, headings, forms, badge list | `<th scope="col">`, `<h1>`/`<h2>`, `<label for>`, `<ul>`/`<li>` |
-| 1.4.1 Use of Color | Review states, diff stat, errors, draft rows | Review states differ by shape; diff numbers carry `+`/`-` signs; errors have text and an icon; draft titles carry hidden "(draft)" text and an underline |
+| 1.4.1 Use of Color | Review states, CI states, diff stat, errors, draft rows | Review states and CI states differ by shape; diff numbers carry `+`/`-` signs; errors have text and an icon; draft titles carry hidden "(draft)" text and an underline |
 | 1.4.3 Contrast (Minimum) | All text | [Contrast](#contrast) table, threshold 4.5 |
 | 1.4.4 Resize Text | Whole page | `min-height` instead of `height`; font sizes in px scale with browser zoom |
 | 1.4.10 Reflow | Everything but the PR table | [Layout](#layout): wrap down to 320px; the table scrolls as a data table exception |
 | 1.4.11 Non-text Contrast | Icons, focus ring, control boundaries | [Contrast](#contrast) table, threshold 3 |
 | 1.4.12 Text Spacing | Whole page | No fixed heights; text containers may grow |
-| 1.4.13 Content on Hover or Focus | Review badges | N/A (only UA-rendered `title` tooltips) |
+| 1.4.13 Content on Hover or Focus | Review badges, CI icons | N/A (only UA-rendered `title` tooltips) |
 | 2.1.1 Keyboard | All controls | Native `<button>`, `<a>`, `<input>`, `<select>`; Enter submits forms |
 | 2.4.2 Page Titled | `index.html` | `<title>review-dashboard</title>` |
 | 2.4.3 Focus Order | Whole page | Tab order above; focus moves on screen changes as listed in [App](#app) |
@@ -569,7 +593,7 @@ Numbers:
 - Check with screen readers whether `aria-label` plus an identical `title` is read twice; if so, drop `title` from badges and keep `aria-label`
 - Confirm with real data which hosts GraphQL `avatarUrl` returns; URLs on other hosts are dropped and shown as ghosts
 - Decide how the Vite dev server coexists with the `<meta>` CSP
-- Check how review state icons look in forced colors mode (`forced-colors: active`)
+- Check how review state icons and CI icons look in forced colors mode (`forced-colors: active`)
 
 ## Appendix: Contrast check script
 

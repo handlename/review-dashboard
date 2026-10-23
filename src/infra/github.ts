@@ -42,6 +42,7 @@ query SearchPullRequests($query: String!, $after: String) {
           nodes { author { login avatarUrl(size: 40) } state submittedAt }
         }
         stackEntry { position stack { number size } }
+        commits(last: 1) { nodes { commit { statusCheckRollup { state } } } }
       }
     }
   }

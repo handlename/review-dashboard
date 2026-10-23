@@ -144,6 +144,7 @@ describe("storage: cache", () => {
 					{ reviewer: null, state: "DISMISSED", submittedAt: "2026-09-28T01:00:00Z" },
 				],
 				stack: null,
+				ciStatus: null,
 			},
 		],
 	};
@@ -160,6 +161,12 @@ describe("storage: cache", () => {
 		const stacked = { ...cache, pullRequests: [{ ...pr, stack: { number: 20, position: 2, size: 3 } }] };
 		saveCache(stacked);
 		expect(loadCache(query)).toEqual(stacked);
+	});
+
+	it("saveCache then loadCache round-trips a CI status", () => {
+		const failed = { ...cache, pullRequests: [{ ...pr, ciStatus: "FAILED" as const }] };
+		saveCache(failed);
+		expect(loadCache(query)).toEqual(failed);
 	});
 
 	it("keeps caches for several queries", () => {
@@ -229,6 +236,17 @@ describe("storage: cache", () => {
 	it("loadCache returns null when a pull request lacks stack (old format)", () => {
 		const { stack: _, ...old } = pr;
 		store({ ...cache, pullRequests: [old] });
+		expect(loadCache(query)).toBeNull();
+	});
+
+	it("loadCache returns null when a pull request lacks ciStatus (old format)", () => {
+		const { ciStatus: _, ...old } = pr;
+		store({ ...cache, pullRequests: [old] });
+		expect(loadCache(query)).toBeNull();
+	});
+
+	it("loadCache returns null when a pull request has an unknown ciStatus", () => {
+		store({ ...cache, pullRequests: [{ ...pr, ciStatus: "SUCCESS" }] });
 		expect(loadCache(query)).toBeNull();
 	});
 

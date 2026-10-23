@@ -13,6 +13,7 @@ It runs entirely in the browser as a static site hosted on GitHub Pages, and tal
 - **PR details at a glance**: PR number, title, repository, author, diff stat (+additions / -deletions / changed files), created and updated dates
 - **Stack position**: PRs in a GitHub stacked PR show their position in the stack after the title (e.g. `2/3`)
 - **Review status**: The latest review result for each reviewer (Approved / Changes requested / Commented / Dismissed)
+- **CI status**: The aggregate CI result of each PR's latest commit (Passed / Failed / Running), shown as an icon after the review status
 - **Grouping and sorting**: Group by organization or repository (the grouped columns are hidden), and sort by clicking column headers
 - **Instant display**: Cached results appear immediately on access, then refresh in the background
 - **One click to GitHub**: Open any PR on GitHub in a new tab
@@ -27,7 +28,7 @@ It runs entirely in the browser as a static site hosted on GitHub Pages, and tal
 ### Token permissions
 
 - **Classic PAT**: grant the `repo` scope to include private repositories
-- **Fine-grained PAT**: works, but can access only one resource owner, so searches across multiple organizations return incomplete results
+- **Fine-grained PAT**: works, but can access only one resource owner, so searches across multiple organizations return incomplete results. CI cells may be empty if the token cannot read checks or commit statuses
 
 ## Documentation
 

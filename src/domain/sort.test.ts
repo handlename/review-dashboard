@@ -16,6 +16,7 @@ function pr(number: number, overrides: Partial<PullRequest> = {}): PullRequest {
 		updatedAt: "2026-09-01T00:00:00Z",
 		latestReviews: [],
 		stack: null,
+		ciStatus: null,
 		...overrides,
 	};
 }
