@@ -65,6 +65,24 @@ export function ReviewStateIcon(props: { state: ReviewState }) {
 	);
 }
 
+export function PendingIcon() {
+	return (
+		<svg
+			className="review-icon review-icon-pending"
+			width="12"
+			height="12"
+			viewBox="0 0 12 12"
+			fill="currentColor"
+			aria-hidden="true"
+		>
+			<circle cx="6" cy="6" r="6" />
+			<g className="review-icon-glyph">
+				<circle cx="6" cy="6" r="1.8" stroke="none" />
+			</g>
+		</svg>
+	);
+}
+
 const CI_STATUS_CLASS: Record<CiStatus, string> = {
 	PASSED: "ci-icon-passed",
 	FAILED: "ci-icon-failed",

@@ -449,6 +449,9 @@ button {
 .review-icon-dismissed {
 	color: var(--rd-color-neutral-emphasis);
 }
+.review-icon-pending {
+	color: var(--rd-color-attention-emphasis);
+}
 
 .ci-status {
 	display: inline-flex;

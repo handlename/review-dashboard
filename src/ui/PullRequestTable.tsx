@@ -141,7 +141,7 @@ export function PullRequestTable(props: {
 							</div>
 						</td>
 						<td>
-							<ReviewBadges reviews={pr.latestReviews} />
+							<ReviewBadges reviews={pr.latestReviews} reviewRequests={pr.reviewRequests} />
 						</td>
 						<td className="col-ci">{pr.ciStatus !== null && <CiStatusCell status={pr.ciStatus} />}</td>
 						<td className="col-diff">

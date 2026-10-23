@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
 import type { SearchNode, SearchPage } from "./githubMapper";
-import { nextCursor, toFetchFailure, toPullRequests, toThrownFailure } from "./githubMapper";
+import {
+	isInsufficientScopes,
+	nextCursor,
+	toFetchFailure,
+	toPullRequests,
+	toThrownFailure,
+} from "./githubMapper";
 
 const avatar = (login: string) =>
 	`https://avatars.githubusercontent.com/u/${login}?v=4`;
@@ -22,6 +28,7 @@ function prNode(overrides: Record<string, unknown> = {}): SearchNode {
 			owner: { login: "handlename" },
 		},
 		latestReviews: { nodes: [] },
+		reviewRequests: { nodes: [] },
 		stackEntry: null,
 		commits: { nodes: [] },
 		...overrides,
@@ -78,6 +85,54 @@ describe("toPullRequests", () => {
 			"COMMENTED",
 			"DISMISSED",
 		]);
+	});
+
+	it("maps requested users and teams to reviewRequests", () => {
+		const [pr] = toPullRequests([
+			prNode({
+				reviewRequests: {
+					nodes: [
+						{ requestedReviewer: { login: "bob", avatarUrl: avatar("bob") } },
+						{
+							requestedReviewer: {
+								combinedSlug: "handlename/web",
+								teamAvatarUrl: "https://avatars.githubusercontent.com/t/1?v=4",
+							},
+						},
+					],
+				},
+			}),
+		]);
+		expect(pr.reviewRequests).toEqual([
+			{ login: "bob", avatarUrl: avatar("bob") },
+			{ login: "handlename/web", avatarUrl: "https://avatars.githubusercontent.com/t/1?v=4" },
+		]);
+	});
+
+	it("maps a null or foreign-host team avatar to null", () => {
+		const [pr] = toPullRequests([
+			prNode({
+				reviewRequests: {
+					nodes: [
+						{ requestedReviewer: { combinedSlug: "a/x", teamAvatarUrl: null } },
+						{ requestedReviewer: { combinedSlug: "a/y", teamAvatarUrl: "https://example.com/t.png" } },
+					],
+				},
+			}),
+		]);
+		expect(pr.reviewRequests.map((a) => a.avatarUrl)).toEqual([null, null]);
+	});
+
+	it("drops null nodes, null requestedReviewer, and empty objects (bots, mannequins)", () => {
+		const [pr] = toPullRequests([
+			prNode({ reviewRequests: { nodes: [null, { requestedReviewer: null }, { requestedReviewer: {} }] } }),
+		]);
+		expect(pr.reviewRequests).toEqual([]);
+	});
+
+	it("maps null reviewRequests to no requests", () => {
+		const [pr] = toPullRequests([prNode({ reviewRequests: null })]);
+		expect(pr.reviewRequests).toEqual([]);
 	});
 
 	it("maps isDraft", () => {
@@ -296,5 +351,30 @@ describe("nextCursor", () => {
 
 	it("nextCursor returns null at 1,000 fetched nodes even if hasNextPage is true", () => {
 		expect(nextCursor(page(true, "abc"), 1000)).toBeNull();
+	});
+});
+
+describe("isInsufficientScopes", () => {
+	// Shape returned by GitHub for Team fields with a classic PAT granted only `repo`
+	const insufficient = {
+		type: "INSUFFICIENT_SCOPES",
+		message: "The 'combinedSlug' field requires one of the following scopes: ['read:org', 'read:discussion']",
+	};
+
+	it("is true for INSUFFICIENT_SCOPES without data", () => {
+		expect(isInsufficientScopes({ errors: [insufficient, insufficient] })).toBe(true);
+	});
+
+	it("is false when search data is present (partial result)", () => {
+		expect(isInsufficientScopes({ data: { search: page(false) }, errors: [insufficient] })).toBe(false);
+	});
+
+	it("is false when the request is also rate limited", () => {
+		expect(isInsufficientScopes({ errors: [insufficient, { type: "RATE_LIMITED", message: "x" }] })).toBe(false);
+	});
+
+	it("is false for other errors", () => {
+		expect(isInsufficientScopes({ errors: [{ type: "FORBIDDEN", message: "x" }] })).toBe(false);
+		expect(isInsufficientScopes(undefined)).toBe(false);
 	});
 });

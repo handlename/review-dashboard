@@ -14,7 +14,7 @@ Users browse the list of PRs matching a search query, check their review status,
 
 - Listing PRs that match a single search query
 - Editing and persisting the search query
-- Showing PR information (number, title, author, diff stat, review results, created date, updated date)
+- Showing PR information (number, title, author, diff stat, review results and pending review requests, created date, updated date)
 - Grouping by organization/repository and sorting by column
 - Caching fetch results and refreshing them in the background on access
 - Automatic refresh at an interval the user chooses
@@ -26,7 +26,7 @@ Users browse the list of PRs matching a search query, check their review status,
 - Saving or switching between multiple search queries
 - Notifications
 - Acting on PRs (submitting reviews, commenting, merging, etc.)
-- Showing pending review requests (requested reviewers) or the PR-level review decision (reviewDecision)
+- Showing the PR-level review decision (reviewDecision)
 
 ## Functional requirements
 
@@ -54,7 +54,7 @@ Users browse the list of PRs matching a search query, check their review status,
 |----|-------------|
 | FR-LIST-1 | For each PR, show the PR number, title, organization, repository, author, diff stat, created date, and updated date |
 | FR-LIST-2 | Show the diff stat as added lines (+additions), deleted lines (-deletions), and the number of changed files |
-| FR-LIST-3 | For each PR, show the latest review result per reviewer (Approved / Changes requested / Commented / Dismissed) |
+| FR-LIST-3 | For each PR, show the latest review result per reviewer (Approved / Changes requested / Commented / Dismissed), followed by the users and teams whose review is requested (Pending). A reviewer requested again after reviewing is shown as Pending only |
 | FR-LIST-4 | The PR page on GitHub can be opened in a new tab, e.g. from the PR title |
 | FR-LIST-5 | The grouping can be chosen from "None", "Organization", and "Repository". The choice persists across reloads |
 | FR-LIST-6 | Clicking a column header makes that column the sort key. Clicking the same column again reverses the sort direction (ascending/descending). The choice persists across reloads |
@@ -113,6 +113,8 @@ Users browse the list of PRs matching a search query, check their review status,
 - [ ] Changing and applying the search query updates the list, and after a reload the new query and its results are shown (FR-QUERY-2, FR-QUERY-3, FR-CACHE-2)
 - [ ] Each PR shows the information in FR-LIST-1 to FR-LIST-3, and clicking the title opens the PR in a new tab (FR-LIST-4)
 - [ ] For a PR reviewed multiple times by the same reviewer, only the latest result is shown (FR-LIST-3)
+- [ ] Users and teams whose review is requested are shown as Pending after the reviews, and a reviewer requested again after reviewing is shown as Pending only (FR-LIST-3)
+- [ ] With a classic PAT without `read:org`, the list loads without an error and only team review requests are missing (FR-LIST-3)
 - [ ] After changing the grouping and sort and reloading, the changed settings are kept (FR-LIST-5, FR-LIST-6)
 - [ ] On subsequent visits the cache appears immediately and is then replaced by the latest results from the background refresh (FR-CACHE-2, FR-CACHE-3)
 - [ ] When accessed with the network blocked, the cache stays visible and an error is shown (FR-ERR-1, FR-ERR-2)

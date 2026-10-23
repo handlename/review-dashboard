@@ -4,6 +4,7 @@ export type ReviewState =
 	| "COMMENTED"
 	| "DISMISSED";
 
+// A user, or a team (login is "org/slug") when it is a review request.
 export type Actor = {
 	readonly login: string;
 	// null unless it starts with https://avatars.githubusercontent.com/
@@ -45,6 +46,19 @@ export type PullRequest = {
 	readonly createdAt: string;
 	readonly updatedAt: string;
 	readonly latestReviews: readonly Review[];
+	// Users and teams whose review is requested and not yet submitted
+	readonly reviewRequests: readonly Actor[];
 	readonly stack: StackPosition | null;
 	readonly ciStatus: CiStatus | null;
 };
+
+// A re-requested reviewer is shown as pending only, so their earlier review is hidden.
+export function respondedReviews(
+	reviews: readonly Review[],
+	reviewRequests: readonly Actor[],
+): readonly Review[] {
+	const requested = new Set(reviewRequests.map((actor) => actor.login));
+	return reviews
+		.filter((review) => review.reviewer === null || !requested.has(review.reviewer.login))
+		.sort((a, b) => Date.parse(a.submittedAt) - Date.parse(b.submittedAt));
+}
