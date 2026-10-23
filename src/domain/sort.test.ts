@@ -17,6 +17,7 @@ function pr(number: number, overrides: Partial<PullRequest> = {}): PullRequest {
 		latestReviews: [],
 		reviewRequests: [],
 		stack: null,
+		ciStatus: null,
 		...overrides,
 	};
 }

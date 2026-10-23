@@ -56,6 +56,7 @@ query SearchPullRequests($query: String!, $after: String) {
           }
         }
         stackEntry { position stack { number size } }
+        commits(last: 1) { nodes { commit { statusCheckRollup { state } } } }
       }
     }
   }

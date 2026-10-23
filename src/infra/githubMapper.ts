@@ -1,4 +1,4 @@
-import type { Actor, PullRequest, Review, ReviewState, StackPosition } from "../domain/pullRequest";
+import type { Actor, CiStatus, PullRequest, Review, ReviewState, StackPosition } from "../domain/pullRequest";
 import { SEARCH_LIMIT } from "../domain/searchQuery";
 
 type ActorNode = { readonly login: string; readonly avatarUrl: string } | null;
@@ -23,6 +23,12 @@ type StackEntryNode = {
 	readonly stack: { readonly number: number; readonly size: number } | null;
 } | null;
 
+type CommitsNode = {
+	readonly nodes: readonly ({
+		readonly commit: { readonly statusCheckRollup: { readonly state: string } | null };
+	} | null)[] | null;
+};
+
 type PullRequestNode = {
 	readonly number: number;
 	readonly title: string;
@@ -45,6 +51,7 @@ type PullRequestNode = {
 		readonly nodes: readonly ReviewRequestNode[] | null;
 	} | null;
 	readonly stackEntry: StackEntryNode;
+	readonly commits: CommitsNode;
 };
 
 // Non-PullRequest results (issues) match no fragment and arrive as empty objects.
@@ -71,6 +78,14 @@ const REVIEW_STATES: readonly string[] = [
 	"COMMENTED",
 	"DISMISSED",
 ];
+
+const CI_STATUSES: Readonly<Record<string, CiStatus>> = {
+	SUCCESS: "PASSED",
+	FAILURE: "FAILED",
+	ERROR: "FAILED",
+	PENDING: "RUNNING",
+	EXPECTED: "RUNNING",
+};
 
 function toAvatarUrl(url: string): string | null {
 	return url.startsWith(AVATAR_ORIGIN) ? url : null;
@@ -138,6 +153,12 @@ function toStack(node: StackEntryNode): StackPosition | null {
 		: { number: node.stack.number, position: node.position, size: node.stack.size };
 }
 
+function toCiStatus(commits: CommitsNode): CiStatus | null {
+	const state = commits.nodes?.at(-1)?.commit.statusCheckRollup?.state;
+	// hasOwn keeps inherited keys such as "toString" from matching.
+	return state !== undefined && Object.hasOwn(CI_STATUSES, state) ? CI_STATUSES[state] : null;
+}
+
 export function toPullRequests(
 	nodes: readonly (SearchNode | null)[],
 ): readonly PullRequest[] {
@@ -161,6 +182,7 @@ export function toPullRequests(
 		latestReviews: toReviews(node.latestReviews?.nodes ?? null),
 		reviewRequests: toReviewRequests(node.reviewRequests?.nodes ?? null),
 		stack: toStack(node.stackEntry),
+		ciStatus: toCiStatus(node.commits),
 	}));
 }
 

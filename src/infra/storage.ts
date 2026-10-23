@@ -100,7 +100,8 @@ function isPullRequest(value: unknown): value is PullRequest {
 		value.latestReviews.every(isReview) &&
 		Array.isArray(value.reviewRequests) &&
 		value.reviewRequests.every(isActor) &&
-		(value.stack === null || isStackPosition(value.stack))
+		(value.stack === null || isStackPosition(value.stack)) &&
+		(value.ciStatus === null || isOneOf(value.ciStatus, ["PASSED", "FAILED", "RUNNING"]))
 	);
 }
 

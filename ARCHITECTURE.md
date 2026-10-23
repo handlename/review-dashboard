@@ -100,6 +100,8 @@ type StackPosition = {
   readonly size: number;
 };
 
+type CiStatus = "PASSED" | "FAILED" | "RUNNING";
+
 type PullRequest = {
   readonly number: number;
   readonly title: string;
@@ -114,6 +116,7 @@ type PullRequest = {
   readonly latestReviews: readonly Review[];
   readonly reviewRequests: readonly Actor[];   // users and teams whose review is requested
   readonly stack: StackPosition | null;   // null when not in a stacked PR
+  readonly ciStatus: CiStatus | null;     // null when the latest commit has no checks
 };
 
 type Grouping = "none" | "owner" | "repository";
@@ -179,6 +182,7 @@ query SearchPullRequests($query: String!, $after: String) {
           }
         }
         stackEntry { position stack { number size } }
+        commits(last: 1) { nodes { commit { statusCheckRollup { state } } } }
       }
     }
   }
@@ -191,6 +195,7 @@ query SearchPullRequests($query: String!, $after: String) {
 - `reviewRequests` lists users and teams whose review is pending. Bots, mannequins, and null entries are dropped during conversion. A reviewer requested again after reviewing also appears in `latestReviews`; `respondedReviews` hides that review so only the request is shown (FR-LIST-3)
 - The team's `avatarUrl` is aliased to `teamAvatarUrl` because it is nullable while `User.avatarUrl` is not, and GraphQL rejects one field name with different types in sibling fragments
 - `stackEntry` is null for PRs not in a stacked PR; its `stack` can also be null, and either case becomes `stack: null` (FR-LIST-14)
+- `statusCheckRollup` is the aggregate of the checks and commit statuses on the latest commit. `SUCCESS` becomes `PASSED`, `FAILURE` and `ERROR` become `FAILED`, and `PENDING` and `EXPECTED` become `RUNNING`; no commit, a null rollup, or any other state becomes `ciStatus: null` (FR-LIST-15)
 - Paginate with `endCursor` until `hasNextPage` is false or 1,000 results are reached (NFR-6)
 
 ### Authentication and errors
@@ -205,6 +210,7 @@ query SearchPullRequests($query: String!, $after: String) {
 
 - Classic PAT: the `repo` scope is required to include private repositories; `read:org` is needed to show team review requests
 - Fine-grained PAT: it can access only one resource owner, so searches spanning multiple organizations return incomplete results. The PAT input screen explains this limitation
+- CI cells may be empty if the token cannot read checks or commit statuses
 
 ## State transitions
 
@@ -260,6 +266,7 @@ When the storage format changes, bump the version and stop reading the old keys.
 - Caches saved before `isDraft` existed fail validation and are discarded
 - Caches saved before `stack` existed fail validation and are discarded in the same way
 - Caches saved before `reviewRequests` existed fail validation and are discarded in the same way
+- Caches saved before `ciStatus` existed fail validation and are discarded in the same way
 - If localStorage is unavailable or a write fails because the quota is exceeded, the page keeps working (it just cannot save)
 
 ## Security
@@ -285,7 +292,7 @@ Because the PAT is stored in localStorage, preventing XSS is the top priority. (
 ## Testing
 
 - Unit-test the domain's pure functions (sorting, grouping, search query validation, cache validity, hiding re-requested reviews) with Vitest
-- Test `githubMapper` with GraphQL response fixtures (including dropping issue nodes, dropping `PENDING`, a null author, a null reviewer, and converting an `avatarUrl` on another host to `null`, and mapping `stackEntry` and `reviewRequests`)
+- Test `githubMapper` with GraphQL response fixtures (including dropping issue nodes, dropping `PENDING`, a null author, a null reviewer, converting an `avatarUrl` on another host to `null`, mapping `stackEntry` and `reviewRequests`, and mapping the CI states)
 - Test `storage` against invalid JSON and values in an old format
 - Verify the acceptance criteria in REQUIREMENTS.md manually with a real PAT
 
@@ -300,4 +307,5 @@ Because the PAT is stored in localStorage, preventing XSS is the top priority. (
 | Store everything in localStorage | The data is small and a synchronous API keeps it simple | IndexedDB, sessionStorage (would force re-entering the PAT every session) |
 | Fetch `stackEntry` in the same search query | One request still covers everything the list shows. If GitHub gates or removes the field, every fetch fails; the fix is to drop the field or move it to a separate query | A separate query for stack positions (an extra request per fetch) |
 | Retry without the Team fragment on `INSUFFICIENT_SCOPES` | Existing classic PATs with only `repo` keep working, and team requests appear once `read:org` is granted. Costs one extra request per fetch for such PATs | Require `read:org` (breaks existing PATs); never fetch teams |
+| Fetch `statusCheckRollup` in the same search query | Same trade-off as `stackEntry`: one request still covers everything the list shows. If GitHub gates or removes the field, or the aggregation makes a page time out, every fetch fails; the fix is to drop the field or move it to a separate query | A separate query for CI status (an extra request per fetch) |
 | No data-fetching library | Fetch triggers are few and a custom hook is enough; fewer dependencies shrink the XSS attack surface | TanStack Query, etc. |

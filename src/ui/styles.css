@@ -49,7 +49,7 @@
 
 	--rd-layout-max-width: 1280px;
 	--rd-layout-gutter: 24px;
-	--rd-table-min-width: 1024px;
+	--rd-table-min-width: 1064px;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -213,7 +213,8 @@ button {
 	border-bottom: var(--rd-border-width-thin) solid var(--rd-color-border-default);
 }
 
-.pr-table th.col-reviews {
+.pr-table th.col-reviews,
+.pr-table th.col-ci {
 	padding: 0 var(--rd-space-2);
 }
 
@@ -268,12 +269,20 @@ button {
 .col-reviews {
 	width: 152px;
 }
+.col-ci {
+	width: 40px;
+}
 .col-diff {
 	width: 120px;
 }
 .col-created,
 .col-updated {
 	width: 120px;
+}
+
+.pr-table th.col-ci,
+.pr-table td.col-ci {
+	text-align: center;
 }
 
 .pr-table th.col-number .sort-button,
@@ -444,16 +453,34 @@ button {
 	color: var(--rd-color-attention-emphasis);
 }
 
-.review-icon-glyph {
+.ci-status {
+	display: inline-flex;
+	vertical-align: middle;
+}
+
+.ci-icon-passed {
+	color: var(--rd-color-success-emphasis);
+}
+.ci-icon-failed {
+	color: var(--rd-color-danger-emphasis);
+}
+.ci-icon-running {
+	color: var(--rd-color-attention-emphasis);
+}
+
+.review-icon-glyph,
+.ci-icon-glyph {
 	fill: var(--rd-color-fg-on-emphasis);
 	stroke: var(--rd-color-fg-on-emphasis);
 }
 
 @media (forced-colors: active) {
-	.review-icon {
+	.review-icon,
+	.ci-icon {
 		color: CanvasText;
 	}
-	.review-icon-glyph {
+	.review-icon-glyph,
+	.ci-icon-glyph {
 		fill: Canvas;
 		stroke: Canvas;
 	}

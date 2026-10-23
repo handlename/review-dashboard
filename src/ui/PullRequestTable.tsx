@@ -1,7 +1,7 @@
-import type { PullRequest, StackPosition } from "../domain/pullRequest";
+import type { CiStatus, PullRequest, StackPosition } from "../domain/pullRequest";
 import type { Grouping, SortDirection, SortKey } from "../domain/viewSettings";
 import { formatDateTime, formatFileCount, formatNumber, formatRelativeTime } from "./format";
-import { ExternalLinkIcon, SortIcon, StackIcon } from "./icons";
+import { CiStatusIcon, ExternalLinkIcon, SortIcon, StackIcon } from "./icons";
 import { Avatar, ReviewBadges, loginOf } from "./ReviewBadges";
 
 // `now` is null when absolute times are shown.
@@ -26,6 +26,21 @@ function StackBadge(props: { stack: StackPosition }) {
 				<StackIcon /> {position}/{size}
 			</span>
 			<span className="visually-hidden"> ({label})</span>
+		</span>
+	);
+}
+
+const CI_STATUS_LABELS: Record<CiStatus, string> = {
+	PASSED: "CI: Passed",
+	FAILED: "CI: Failed",
+	RUNNING: "CI: Running",
+};
+
+function CiStatusCell(props: { status: CiStatus }) {
+	const label = CI_STATUS_LABELS[props.status];
+	return (
+		<span className="ci-status" role="img" aria-label={label} title={label}>
+			<CiStatusIcon status={props.status} />
 		</span>
 	);
 }
@@ -61,6 +76,7 @@ const COLUMNS: readonly { readonly key: SortKey | null; readonly label: string; 
 	{ key: "repository", label: "Repository", className: "col-repository" },
 	{ key: "author", label: "Author", className: "col-author" },
 	{ key: null, label: "Reviews", className: "col-reviews" },
+	{ key: null, label: "CI", className: "col-ci" },
 	{ key: "diff", label: "Diff", className: "col-diff" },
 	{ key: "createdAt", label: "Created", className: "col-created" },
 	{ key: "updatedAt", label: "Updated", className: "col-updated" },
@@ -127,6 +143,7 @@ export function PullRequestTable(props: {
 						<td>
 							<ReviewBadges reviews={pr.latestReviews} reviewRequests={pr.reviewRequests} />
 						</td>
+						<td className="col-ci">{pr.ciStatus !== null && <CiStatusCell status={pr.ciStatus} />}</td>
 						<td className="col-diff">
 							<span className="diff-additions">+{formatNumber(pr.diffStat.additions)}</span>{" "}
 							<span className="diff-deletions">-{formatNumber(pr.diffStat.deletions)}</span>

@@ -17,6 +17,7 @@ function pr(number: number, repository: string): PullRequest {
 		latestReviews: [],
 		reviewRequests: [],
 		stack: null,
+		ciStatus: null,
 	};
 }
 

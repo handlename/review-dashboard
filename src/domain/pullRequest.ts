@@ -31,6 +31,9 @@ export type StackPosition = {
 	readonly size: number;
 };
 
+// Aggregate result of all checks on the latest commit.
+export type CiStatus = "PASSED" | "FAILED" | "RUNNING";
+
 export type PullRequest = {
 	readonly number: number;
 	readonly title: string;
@@ -46,6 +49,7 @@ export type PullRequest = {
 	// Users and teams whose review is requested and not yet submitted
 	readonly reviewRequests: readonly Actor[];
 	readonly stack: StackPosition | null;
+	readonly ciStatus: CiStatus | null;
 };
 
 // A re-requested reviewer is shown as pending only, so their earlier review is hidden.

@@ -30,6 +30,7 @@ function prNode(overrides: Record<string, unknown> = {}): SearchNode {
 		latestReviews: { nodes: [] },
 		reviewRequests: { nodes: [] },
 		stackEntry: null,
+		commits: { nodes: [] },
 		...overrides,
 	} as SearchNode;
 }
@@ -154,6 +155,30 @@ describe("toPullRequests", () => {
 	it("maps stackEntry without stack to null", () => {
 		const [pr] = toPullRequests([prNode({ stackEntry: { position: 1, stack: null } })]);
 		expect(pr.stack).toBeNull();
+	});
+
+	const rollup = (state: string) => ({ nodes: [{ commit: { statusCheckRollup: { state } } }] });
+
+	it.each([
+		["SUCCESS", "PASSED"],
+		["FAILURE", "FAILED"],
+		["ERROR", "FAILED"],
+		["PENDING", "RUNNING"],
+		["EXPECTED", "RUNNING"],
+	])("maps statusCheckRollup state %s to ciStatus %s", (state, ciStatus) => {
+		const [pr] = toPullRequests([prNode({ commits: rollup(state) })]);
+		expect(pr.ciStatus).toBe(ciStatus);
+	});
+
+	it.each([
+		["a null statusCheckRollup", { nodes: [{ commit: { statusCheckRollup: null } }] }],
+		["empty commit nodes", { nodes: [] }],
+		["null commit nodes", { nodes: null }],
+		["an unknown state", rollup("FOO")],
+		["an inherited key as state", rollup("toString")],
+	])("maps %s to a null ciStatus", (_, commits) => {
+		const [pr] = toPullRequests([prNode({ commits })]);
+		expect(pr.ciStatus).toBeNull();
 	});
 
 	it("maps null author to null", () => {
