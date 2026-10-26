@@ -527,6 +527,20 @@ button {
 	margin-top: 2px;
 }
 
+/* The header, QueryBar, and StatusBar stay at the top; below the designed width they scroll away so they cannot cover the page. */
+@media (min-width: 1024px) {
+	.app-top {
+		position: sticky;
+		top: 0;
+		z-index: 1;
+		background: var(--rd-color-canvas-default);
+	}
+}
+
+html {
+	scroll-padding-top: var(--rd-sticky-height, 0px);
+}
+
 .app-header {
 	border-bottom: var(--rd-border-width-thin) solid var(--rd-color-border-default);
 }
@@ -553,6 +567,30 @@ button {
 
 .app-main {
 	padding-bottom: var(--rd-space-7);
+}
+
+/* Margins instead of padding, so the bottom rule spans only the content width like the PR table. */
+.app-toolbar {
+	margin: 0 max(var(--rd-layout-gutter), (100% - var(--rd-layout-max-width)) / 2 + var(--rd-layout-gutter));
+	border-bottom: var(--rd-border-width-thin) solid var(--rd-color-border-default);
+}
+
+/* A collapsed QueryBar shares one row with the StatusBar; the StatusBar wraps below when the row is too narrow. */
+.app-toolbar:has(> .query-bar:not([open])) {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	column-gap: var(--rd-space-5);
+	padding-block: var(--rd-space-2);
+}
+
+.app-toolbar:has(> .query-bar:not([open])) > .query-bar {
+	padding: 0;
+}
+
+.app-toolbar:has(> .query-bar:not([open])) > .status-bar {
+	flex: 1 1 auto;
+	padding-bottom: 0;
 }
 
 .grouping {
@@ -652,10 +690,20 @@ button {
 }
 
 .query-bar {
+	padding: var(--rd-space-3) 0;
+}
+
+.query-summary {
+	width: fit-content;
+	min-height: 24px;
+	cursor: pointer;
+}
+
+.query-form {
 	display: flex;
 	flex-direction: column;
 	gap: var(--rd-space-1);
-	padding: var(--rd-space-4) 0;
+	margin-top: var(--rd-space-1);
 }
 
 .query-row {
@@ -678,7 +726,6 @@ button {
 	min-height: 40px;
 	padding-bottom: var(--rd-space-3);
 	color: var(--rd-color-fg-muted);
-	border-bottom: var(--rd-border-width-thin) solid var(--rd-color-border-default);
 }
 
 .status-row {
@@ -764,6 +811,6 @@ button {
 	margin-top: var(--rd-space-2);
 }
 
-.status-bar + .table-wrapper {
+.app-main > .table-wrapper:first-child {
 	margin-top: var(--rd-space-5);
 }

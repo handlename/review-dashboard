@@ -67,6 +67,7 @@ describe("storage: view settings", () => {
 			sortDirection: "asc",
 			relativeTime: true,
 			autoRefreshMinutes: 5,
+			queryBarOpen: false,
 		} as const;
 		saveViewSettings(settings);
 		expect(loadViewSettings()).toEqual(settings);
@@ -92,7 +93,7 @@ describe("storage: view settings", () => {
 		expect(loadViewSettings()).toBeNull();
 	});
 
-	it("loadViewSettings keeps grouping and sort and fills defaults for settings saved before relativeTime / autoRefreshMinutes", () => {
+	it("loadViewSettings keeps grouping and sort and fills defaults for settings saved before relativeTime / autoRefreshMinutes / queryBarOpen", () => {
 		localStorage.setItem(
 			"review-dashboard:v1:view",
 			JSON.stringify({ grouping: "owner", sortKey: "title", sortDirection: "asc" }),
@@ -103,18 +104,19 @@ describe("storage: view settings", () => {
 			sortDirection: "asc",
 			relativeTime: false,
 			autoRefreshMinutes: 0,
+			queryBarOpen: true,
 		});
 	});
 
 	it.each([
-		{ relativeTime: "yes", autoRefreshMinutes: 3 },
-		{ relativeTime: 1, autoRefreshMinutes: "5" },
-	])("loadViewSettings falls back to defaults for invalid relativeTime / autoRefreshMinutes %#", (value) => {
+		{ relativeTime: "yes", autoRefreshMinutes: 3, queryBarOpen: "no" },
+		{ relativeTime: 1, autoRefreshMinutes: "5", queryBarOpen: 0 },
+	])("loadViewSettings falls back to defaults for invalid relativeTime / autoRefreshMinutes / queryBarOpen %#", (value) => {
 		localStorage.setItem(
 			"review-dashboard:v1:view",
 			JSON.stringify({ grouping: "owner", sortKey: "title", sortDirection: "asc", ...value }),
 		);
-		expect(loadViewSettings()).toMatchObject({ relativeTime: false, autoRefreshMinutes: 0 });
+		expect(loadViewSettings()).toMatchObject({ relativeTime: false, autoRefreshMinutes: 0, queryBarOpen: true });
 	});
 
 	it("loadViewSettings returns null when a field is missing (old format)", () => {

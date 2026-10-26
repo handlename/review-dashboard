@@ -24,6 +24,7 @@ export type ViewSettings = {
 	readonly sortDirection: SortDirection;
 	readonly relativeTime: boolean;
 	readonly autoRefreshMinutes: AutoRefreshMinutes;
+	readonly queryBarOpen: boolean;
 };
 
 export const DEFAULT_VIEW_SETTINGS: ViewSettings = {
@@ -32,6 +33,7 @@ export const DEFAULT_VIEW_SETTINGS: ViewSettings = {
 	sortDirection: "desc",
 	relativeTime: false,
 	autoRefreshMinutes: 0,
+	queryBarOpen: true,
 };
 
 // Switching to another column keeps the current direction.

@@ -221,7 +221,7 @@ Buttons:
 - The layout is designed for viewports 1024px wide or more. The minimum width applies to every table, grouped or not, so at a 1024px viewport (content 976px wide, 974px inside the wrapper border) every table scrolls by about 90px. When grouped, the hidden columns' width goes to Title
 - Only the PR table has a minimum width: `<table>` gets `min-width: var(--rd-table-min-width)` and its wrapper gets `overflow-x: auto`, so narrow viewports scroll the table horizontally. A data table is an exception in 1.4.10 Reflow
 - Everything outside the table (header, QueryBar, StatusBar, PAT input screen) uses `flex-wrap: wrap` and stays usable without horizontal scrolling down to a 320px viewport (1.4.10)
-- No element is sticky or fixed
+- On viewports 1024px wide or more, the header, QueryBar, and StatusBar are wrapped in one `position: sticky` container at the top. Below that width they scroll with the page, so they cannot cover most of a narrow viewport
 - Heights are set with `min-height`, never `height`, so text resizing and spacing overrides do not clip content (1.4.4, 1.4.12)
 
 ## Screens
@@ -264,7 +264,7 @@ Shown when a PAT is saved and the state is not Unauthorized.
 +----------------------------------------------------------------------------------------------+
 | review-dashboard                                         Group by [ Repository v ]  [ (*) ]  |  App header, min-height 56px; (*) = Settings
 +----------------------------------------------------------------------------------------------+
-| Search query                                                                                 |  QueryBar, padding space-4 gutter
+| v Search query                                                                               |  QueryBar, padding space-3 gutter; v = open/close
 | [ is:pr review-requested:@me state:open archived:false         ] [ Apply ] [ Reset ]         |  gap space-2
 +----------------------------------------------------------------------------------------------+
 | Last fetched 2026-09-28 14:05   (spinner) Refreshing…                      [ Refresh ]       |  StatusBar, min-height 40px, fg-muted
@@ -341,7 +341,7 @@ States: [Unauthorized row](#state-matrix).
 
 Elements:
 
-- Visible `<label for>` "Search query"
+- `<details>` whose `<summary>` "Search query" opens and closes the bar. The `<summary>` is the input's visible label through `aria-labelledby`. When closed, only the `<summary>` line is shown, and it shares one row with the StatusBar (`--rd-space-5` between them, `--rd-space-2` above and below the row); the StatusBar wraps below it when the row is too narrow
 - `<input type="text">` in `--rd-font-family-mono`, growing to fill the row (`flex: 1 1 320px`)
 - Apply (primary) and Reset (secondary)
 - Helper line "A search query is required.", shown only while the input is empty, referenced by the input's `aria-describedby`
@@ -349,12 +349,13 @@ Elements:
 Behavior:
 
 - Enter in the input runs Apply (FR-QUERY-2)
+- The open state is saved in the view settings as `queryBarOpen` (default `true`) and restored on reload
 - While the input is empty or whitespace-only, Apply has `aria-disabled="true"` and pressing it does nothing (FR-QUERY-5). It is not `disabled`, so focus is never lost
 - Reset puts the default query in the input and applies it (FR-QUERY-4)
 - The input follows the search query in the page URL, so browser back and forward update it (FR-QUERY-3)
 - Apply and Reset work in every state, including while fetching; applying aborts the running fetch ([ARCHITECTURE.md](ARCHITECTURE.md#authentication-and-errors))
 
-Used tokens: `--rd-font-family-mono`, `--rd-color-border-control`, `--rd-color-canvas-default`, `--rd-space-2`, `--rd-space-4`.
+Used tokens: `--rd-font-family-mono`, `--rd-color-border-control`, `--rd-color-canvas-default`, `--rd-space-1`, `--rd-space-2`, `--rd-space-3`.
 States: [QueryBar column](#state-matrix).
 
 ### StatusBar
@@ -528,7 +529,7 @@ These apply on top of any state whose PR list column shows a list.
 
 ## Interaction and accessibility
 
-Tab order follows the visual order: header (grouping select, Settings) → QueryBar (input, Apply, Reset) → StatusBar (Refresh) → for each group, table header sort buttons → PR title links row by row.
+Tab order follows the visual order: header (grouping select, Settings) → QueryBar (Search query summary, then input, Apply, Reset while open) → StatusBar (Refresh) → for each group, table header sort buttons → PR title links row by row.
 In the settings dialog: Show relative times → Auto refresh → Log out → Close.
 On the PAT input screen: PAT input → Save → Log out.
 
@@ -551,7 +552,7 @@ The ring is drawn with `outline`, never `box-shadow`, so it stays visible in for
 | 2.4.3 Focus Order | Whole page | Tab order above; focus moves on screen changes as listed in [App](#app) |
 | 2.4.6 Headings and Labels | Headings, form labels | Descriptive `<h1>`/`<h2>` and visible labels |
 | 2.4.7 Focus Visible | All focusable elements | Focus ring above |
-| 2.4.11 Focus Not Obscured (Minimum) | Whole page | N/A (no sticky elements) |
+| 2.4.11 Focus Not Obscured (Minimum) | Whole page | `scroll-padding-top` on `<html>` follows the sticky container height (measured with `ResizeObserver`), so focused elements scroll out from under it |
 | 2.5.8 Target Size (Minimum) | Buttons, select, links | Buttons and selects at least 32px tall; PR title links sit in 48px rows with no adjacent targets |
 | 3.1.1 Language of Page | `index.html` | `<html lang="en">` |
 | 3.3.1 Error Identification | TokenForm, QueryBar | `aria-invalid="true"` and a text message linked by `aria-describedby` |

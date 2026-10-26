@@ -132,6 +132,7 @@ export function loadViewSettings(): ViewSettings | null {
 		autoRefreshMinutes: isAutoRefreshMinutes(value.autoRefreshMinutes)
 			? value.autoRefreshMinutes
 			: DEFAULT_VIEW_SETTINGS.autoRefreshMinutes,
+		queryBarOpen: typeof value.queryBarOpen === "boolean" ? value.queryBarOpen : DEFAULT_VIEW_SETTINGS.queryBarOpen,
 	};
 }
 

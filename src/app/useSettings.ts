@@ -44,6 +44,11 @@ export function useSettings() {
 		[viewSettings, updateViewSettings],
 	);
 
+	const setQueryBarOpen = useCallback(
+		(queryBarOpen: boolean) => updateViewSettings({ ...viewSettings, queryBarOpen }),
+		[viewSettings, updateViewSettings],
+	);
+
 	return {
 		token,
 		saveToken,
@@ -53,5 +58,6 @@ export function useSettings() {
 		toggleSort,
 		setRelativeTime,
 		setAutoRefreshMinutes,
+		setQueryBarOpen,
 	};
 }
