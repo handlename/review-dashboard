@@ -157,29 +157,53 @@ export function App() {
 		}
 	}, [dashboard]);
 
+	// Keeps focused elements from scrolling under the sticky top area (2.4.11).
+	const topRef = useRef<HTMLDivElement>(null);
+	useEffect(() => {
+		const top = topRef.current;
+		if (top === null) {
+			return;
+		}
+		const root = document.documentElement;
+		const observer = new ResizeObserver(() => {
+			const sticky = getComputedStyle(top).position === "sticky";
+			root.style.setProperty("--rd-sticky-height", sticky ? `${top.offsetHeight}px` : "0px");
+		});
+		observer.observe(top);
+		return () => observer.disconnect();
+	}, []);
+
 	return (
 		<>
-			<header className="app-header">
-				<div className="app-header-inner">
-					<h1 ref={headingRef} className="app-title" tabIndex={-1}>
-						review-dashboard
-					</h1>
-					{dashboard && (
-						<div className="header-actions">
-							<GroupingSelect grouping={viewSettings.grouping} onChange={setGrouping} />
-							<button
-								type="button"
-								className="button button-secondary"
-								aria-label="Settings"
-								aria-haspopup="dialog"
-								onClick={() => settingsRef.current?.showModal()}
-							>
-								<GearIcon />
-							</button>
-						</div>
-					)}
-				</div>
-			</header>
+			<div ref={topRef} className="app-top">
+				<header className="app-header">
+					<div className="app-header-inner">
+						<h1 ref={headingRef} className="app-title" tabIndex={-1}>
+							review-dashboard
+						</h1>
+						{dashboard && (
+							<div className="header-actions">
+								<GroupingSelect grouping={viewSettings.grouping} onChange={setGrouping} />
+								<button
+									type="button"
+									className="button button-secondary"
+									aria-label="Settings"
+									aria-haspopup="dialog"
+									onClick={() => settingsRef.current?.showModal()}
+								>
+									<GearIcon />
+								</button>
+							</div>
+						)}
+					</div>
+				</header>
+				{dashboard && (
+					<div className="app-toolbar">
+						<QueryBar query={state.query} onApply={applyQuery} />
+						<StatusBar state={state} timer={timer} onRefresh={refresh} />
+					</div>
+				)}
+			</div>
 			<main className="app-main">
 				{!dashboard ? (
 					// Remount on logout from Unauthorized so focus and a stale error are reset.
@@ -192,8 +216,6 @@ export function App() {
 					/>
 				) : (
 					<>
-						<QueryBar query={state.query} onApply={applyQuery} />
-						<StatusBar state={state} timer={timer} onRefresh={refresh} />
 						<PullRequestList state={state} groups={groups} viewSettings={viewSettings} onSort={toggleSort} now={now} />
 						<SettingsDialog
 							dialogRef={settingsRef}

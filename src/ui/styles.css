@@ -527,11 +527,26 @@ button {
 	margin-top: 2px;
 }
 
+/* The header, QueryBar, and StatusBar stay at the top; below the designed width they scroll away so they cannot cover the page. */
+@media (min-width: 1024px) {
+	.app-top {
+		position: sticky;
+		top: 0;
+		z-index: 1;
+		background: var(--rd-color-canvas-default);
+	}
+}
+
+html {
+	scroll-padding-top: var(--rd-sticky-height, 0px);
+}
+
 .app-header {
 	border-bottom: var(--rd-border-width-thin) solid var(--rd-color-border-default);
 }
 
 .app-header-inner,
+.app-toolbar,
 .app-main {
 	max-width: var(--rd-layout-max-width);
 	margin: 0 auto;
@@ -764,6 +779,6 @@ button {
 	margin-top: var(--rd-space-2);
 }
 
-.status-bar + .table-wrapper {
+.app-main > .table-wrapper:first-child {
 	margin-top: var(--rd-space-5);
 }
