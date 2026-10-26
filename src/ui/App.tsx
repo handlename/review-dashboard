@@ -132,6 +132,7 @@ export function App() {
 		toggleSort,
 		setRelativeTime,
 		setAutoRefreshMinutes,
+		setQueryBarOpen,
 	} = useSettings();
 	const { state, pullRequests, groups, applyQuery, refresh } = usePullRequests(token, viewSettings);
 	const now = useNow(viewSettings.relativeTime);
@@ -199,7 +200,12 @@ export function App() {
 				</header>
 				{dashboard && (
 					<div className="app-toolbar">
-						<QueryBar query={state.query} onApply={applyQuery} />
+						<QueryBar
+							query={state.query}
+							onApply={applyQuery}
+							open={viewSettings.queryBarOpen}
+							onOpenChange={setQueryBarOpen}
+						/>
 						<StatusBar state={state} timer={timer} onRefresh={refresh} />
 					</div>
 				)}

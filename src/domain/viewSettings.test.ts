@@ -3,13 +3,14 @@ import type { ViewSettings } from "./viewSettings";
 import { DEFAULT_VIEW_SETTINGS, isAutoRefreshMinutes, toggleSort } from "./viewSettings";
 
 describe("viewSettings", () => {
-	it("DEFAULT_VIEW_SETTINGS is none / updatedAt / desc, absolute times, auto refresh off", () => {
+	it("DEFAULT_VIEW_SETTINGS is none / updatedAt / desc, absolute times, auto refresh off, query bar open", () => {
 		expect(DEFAULT_VIEW_SETTINGS).toEqual({
 			grouping: "none",
 			sortKey: "updatedAt",
 			sortDirection: "desc",
 			relativeTime: false,
 			autoRefreshMinutes: 0,
+			queryBarOpen: true,
 		});
 	});
 

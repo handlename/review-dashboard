@@ -264,7 +264,7 @@ Shown when a PAT is saved and the state is not Unauthorized.
 +----------------------------------------------------------------------------------------------+
 | review-dashboard                                         Group by [ Repository v ]  [ (*) ]  |  App header, min-height 56px; (*) = Settings
 +----------------------------------------------------------------------------------------------+
-| Search query                                                                                 |  QueryBar, padding space-4 gutter
+| v Search query                                                                               |  QueryBar, padding space-3 gutter; v = open/close
 | [ is:pr review-requested:@me state:open archived:false         ] [ Apply ] [ Reset ]         |  gap space-2
 +----------------------------------------------------------------------------------------------+
 | Last fetched 2026-09-28 14:05   (spinner) Refreshing…                      [ Refresh ]       |  StatusBar, min-height 40px, fg-muted
@@ -341,7 +341,7 @@ States: [Unauthorized row](#state-matrix).
 
 Elements:
 
-- Visible `<label for>` "Search query"
+- `<details>` whose `<summary>` "Search query" opens and closes the bar. The `<summary>` is the input's visible label through `aria-labelledby`. When closed, only the `<summary>` line is shown, and it shares one row with the StatusBar (`--rd-space-5` between them, `--rd-space-2` above and below the row); the StatusBar wraps below it when the row is too narrow
 - `<input type="text">` in `--rd-font-family-mono`, growing to fill the row (`flex: 1 1 320px`)
 - Apply (primary) and Reset (secondary)
 - Helper line "A search query is required.", shown only while the input is empty, referenced by the input's `aria-describedby`
@@ -349,12 +349,13 @@ Elements:
 Behavior:
 
 - Enter in the input runs Apply (FR-QUERY-2)
+- The open state is saved in the view settings as `queryBarOpen` (default `true`) and restored on reload
 - While the input is empty or whitespace-only, Apply has `aria-disabled="true"` and pressing it does nothing (FR-QUERY-5). It is not `disabled`, so focus is never lost
 - Reset puts the default query in the input and applies it (FR-QUERY-4)
 - The input follows the search query in the page URL, so browser back and forward update it (FR-QUERY-3)
 - Apply and Reset work in every state, including while fetching; applying aborts the running fetch ([ARCHITECTURE.md](ARCHITECTURE.md#authentication-and-errors))
 
-Used tokens: `--rd-font-family-mono`, `--rd-color-border-control`, `--rd-color-canvas-default`, `--rd-space-2`, `--rd-space-4`.
+Used tokens: `--rd-font-family-mono`, `--rd-color-border-control`, `--rd-color-canvas-default`, `--rd-space-1`, `--rd-space-2`, `--rd-space-3`.
 States: [QueryBar column](#state-matrix).
 
 ### StatusBar
@@ -528,7 +529,7 @@ These apply on top of any state whose PR list column shows a list.
 
 ## Interaction and accessibility
 
-Tab order follows the visual order: header (grouping select, Settings) → QueryBar (input, Apply, Reset) → StatusBar (Refresh) → for each group, table header sort buttons → PR title links row by row.
+Tab order follows the visual order: header (grouping select, Settings) → QueryBar (Search query summary, then input, Apply, Reset while open) → StatusBar (Refresh) → for each group, table header sort buttons → PR title links row by row.
 In the settings dialog: Show relative times → Auto refresh → Log out → Close.
 On the PAT input screen: PAT input → Save → Log out.
 

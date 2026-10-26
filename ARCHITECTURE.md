@@ -130,6 +130,7 @@ type ViewSettings = {
   readonly sortDirection: SortDirection;
   readonly relativeTime: boolean;
   readonly autoRefreshMinutes: AutoRefreshMinutes;
+  readonly queryBarOpen: boolean;
 };
 
 type Cache = {
@@ -256,13 +257,13 @@ When the storage format changes, bump the version and stop reading the old keys.
 | Key | Contents | Removed when |
 |-----|----------|--------------|
 | `review-dashboard:v1:token` | PAT | Log out |
-| `review-dashboard:v1:view` | View settings (JSON), including the time display and auto refresh interval | Never |
+| `review-dashboard:v1:view` | View settings (JSON), including the time display, auto refresh interval, and QueryBar open state | Never |
 | `review-dashboard:v1:cache` | Caches (JSON array, newest first) | Log out; the oldest is dropped when a sixth search query is fetched |
 
 - The caches hold results for the five most recently fetched search queries, one per search query. If saving all of them exceeds the quota, only as many of the newest as fit are saved
 - The search query is not stored in localStorage. It lives in the page URL as the `q` parameter (omitted for the default query), so pages with different search queries can be open at the same time. Applying a search query adds a history entry, and browser back and forward apply the search query of that entry
 - On read, parse the JSON and validate its shape; treat invalid values as absent
-- View settings saved before `relativeTime` and `autoRefreshMinutes` existed are still read: those two fields fall back to their defaults when missing or invalid, while grouping and sort keep their values
+- View settings saved before `relativeTime`, `autoRefreshMinutes`, and `queryBarOpen` existed are still read: those fields fall back to their defaults when missing or invalid, while grouping and sort keep their values
 - Caches saved before `isDraft` existed fail validation and are discarded
 - Caches saved before `stack` existed fail validation and are discarded in the same way
 - Caches saved before `reviewRequests` existed fail validation and are discarded in the same way
